@@ -1,0 +1,2983 @@
+<div class="app-layout">
+    
+    <!-- En-tête / Barre de navigation -->
+    <header class="app-header card-glass">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-title">Agenda Efficacité</h1>
+          <span class="logo-subtitle">Optimisez votre répartition du temps de travail</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Vider l'agenda -->
+        <button id="header-clear-btn" class="btn btn-secondary btn-sm clear-btn" style="display: none;">
+          🗑️ Vider l'agenda
+        </button>
+
+        <!-- Thème clair / sombre -->
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Changer de thème">
+          <!-- Moon Icon (Dark Mode by default) -->
+          <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation par onglets -->
+    <nav class="app-tabs-nav">
+      <div class="tabs-container card-glass">
+        
+        <!-- Tab 1: Charger -->
+        <button class="tab-button active" data-tab="import">
+          <span class="tab-icon">📥</span>
+          <span class="tab-label">1. Charger l'agenda</span>
+        </button>
+
+        <!-- Tab 2: Catégoriser -->
+        <button class="tab-button disabled" data-tab="categorize" id="nav-tab-categorize">
+          <span class="tab-icon">🏷️</span>
+          <span class="tab-label">2. Catégoriser</span>
+          <span class="lock-icon" title="Chargez un agenda pour débloquer">🔒</span>
+        </button>
+
+        <!-- Tab 3: Tableau de Bord -->
+        <button class="tab-button disabled" data-tab="dashboard" id="nav-tab-dashboard">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">3. Tableau de bord</span>
+          <span class="lock-icon" title="Chargez un agenda pour débloquer">🔒</span>
+        </button>
+
+        <!-- Tab 4: Optimiser -->
+        <button class="tab-button disabled" data-tab="simulator" id="nav-tab-simulator">
+          <span class="tab-icon">⚡</span>
+          <span class="tab-label">4. Optimiser (Simulateur)</span>
+          <span class="lock-icon" title="Chargez un agenda pour débloquer">🔒</span>
+        </button>
+
+      </div>
+    </nav>
+
+    <!-- Zone principale de contenu -->
+    <main class="app-main-content">
+
+      <!-- ================= ONGLET 1: CHARGER L'AGENDA ================= -->
+      <section id="panel-import" class="tab-panel active">
+        <div class="import-container">
+          
+          <div class="grid-2">
+            <div class="card-glass border-primary">
+              <h3 class="card-title text-gradient">📂 Charger ou Importer un agenda</h3>
+              <p class="card-desc">Glissez un fichier CSV Outlook ou testez notre jeu d'essai pré-rempli.</p>
+              
+              <div id="dropzone" class="dropzone">
+                <input type="file" id="file-input" accept=".csv" style="display: none;">
+                
+                <div class="dropzone-content">
+                  <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                  </svg>
+                  <p id="dropzone-label" class="dropzone-text"><strong>Glissez votre CSV Outlook</strong> ici ou <span class="browse-link">parcourez</span></p>
+                </div>
+              </div>
+
+              <div class="actions-row">
+                <button id="load-demo-btn" class="btn btn-secondary">
+                  ⚡ Charger la démo
+                </button>
+                <button id="confirm-import-btn" class="btn btn-primary" disabled>
+                  Valider l'import (<span id="import-count-badge">0</span> évts)
+                </button>
+              </div>
+            </div>
+
+            <div class="card-glass">
+              <h3 class="card-title">📖 Guide d'exportation Outlook</h3>
+              <p class="card-desc">Comment obtenir votre fichier d'agenda en 30 secondes :</p>
+              <ul class="quick-guide-list">
+                <li>Dans Outlook : <strong>Fichier</strong> &gt; <strong>Ouvrir et exporter</strong> &gt; <strong>Importer/Exporter</strong>.</li>
+                <li>Sélectionnez <strong>Exporter vers un fichier</strong> &gt; <strong>Valeurs séparées par une virgule (CSV)</strong>.</li>
+                <li>Choisissez votre dossier <strong>Calendrier</strong> et sauvegardez.</li>
+              </ul>
+              <div class="csv-sample-info">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                <span>Vous pouvez aussi construire ou ajuster votre planning directement dans le calendrier ci-dessous !</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly Calendar View -->
+          <div class="card-glass border-warning calendar-card">
+            <div class="calendar-header">
+              <div>
+                <h3 class="card-title text-gradient">📅 Planificateur interactif hebdomadaire</h3>
+                <p class="card-desc">Cliquez n'importe où dans la grille pour ajouter un événement. Survolez-les pour les supprimer.</p>
+              </div>
+              
+              <!-- Week Navigator -->
+              <div class="week-navigator">
+                <button class="btn btn-secondary nav-btn" id="import-cal-prev">‹ Semaine précédente</button>
+                <span class="week-label" id="import-cal-week-label">Semaine...</span>
+                <button class="btn btn-secondary nav-btn" id="import-cal-next">Semaine suivante ›</button>
+              </div>
+            </div>
+
+            <div class="calendar-scroll-wrapper">
+              <div class="calendar-grid">
+                <!-- Days Header Row -->
+                <div class="grid-header-row" id="import-cal-days-header">
+                  <!-- Generated dynamically in JS -->
+                </div>
+
+                <div class="grid-body">
+                  <!-- Left hours col -->
+                  <div class="time-column" id="import-cal-hours-col">
+                    <!-- Generated dynamically -->
+                  </div>
+
+                  <!-- Days container -->
+                  <div class="days-columns-container">
+                    <!-- Background lines -->
+                    <div class="grid-lines-bg" id="import-cal-grid-lines">
+                      <!-- Generated dynamically -->
+                    </div>
+
+                    <!-- Day cols container -->
+                    <div class="days-columns-container" id="import-cal-days-cols">
+                      <!-- Generated dynamically -->
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= ONGLET 2: CATEGORISER ================= -->
+      <section id="panel-categorize" class="tab-panel">
+        <div class="categorization-container">
+          
+          <div class="card-glass border-success header-summary">
+            <div class="summary-details">
+              <h3 class="card-title text-gradient">🏷️ Étape 2 : Classer mon temps</h3>
+              <p class="card-desc">
+                Attribuez une catégorie à chaque réunion ou bloc d'activité en cliquant directement dessus dans l'agenda hebdomadaire. Tout commence comme « Non classé » (gris).
+              </p>
+            </div>
+            
+            <div class="progress-box">
+              <div class="progress-label">
+                <span>Événements catégorisés</span>
+                <strong id="categorize-progress-text">0 / 0</strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div id="categorize-progress-fill" class="progress-bar-fill bg-success" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- Search & Filters -->
+            <div class="filters-card card-glass">
+              <div class="search-box" style="margin-bottom: 1rem;">
+                <input type="text" id="categorize-search" placeholder="Rechercher un événement par sujet..." class="input-control">
+              </div>
+              
+              <div class="filter-buttons-row" id="categorize-filters-row">
+                <!-- Generated dynamically -->
+              </div>
+            </div>
+
+            <!-- Custom Category Manager -->
+            <div class="card-glass categories-manager">
+              <h4 class="small-title">🎨 Gérer mes catégories personnalisées</h4>
+              <p class="small-desc">Les catégories créées ici seront disponibles pour classer vos réunions.</p>
+              
+              <div id="custom-cats-list-container" class="custom-cats-list">
+                <!-- Generated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly Calendar View for Categorize -->
+          <div class="card-glass border-primary calendar-card">
+            <div class="calendar-header">
+              <div>
+                <h3 class="card-title text-gradient">📅 Planificateur interactif hebdomadaire</h3>
+                <p class="card-desc">Cliquez sur un bloc d'événement de l'agenda pour lui associer une catégorie d'activité.</p>
+              </div>
+              
+              <div class="week-navigator">
+                <button class="btn btn-secondary nav-btn" id="categorize-cal-prev">‹ Semaine précédente</button>
+                <span class="week-label" id="categorize-cal-week-label">Semaine...</span>
+                <button class="btn btn-secondary nav-btn" id="categorize-cal-next">Semaine suivante ›</button>
+              </div>
+            </div>
+
+            <div class="calendar-scroll-wrapper">
+              <div class="calendar-grid">
+                <div class="grid-header-row" id="categorize-cal-days-header"></div>
+
+                <div class="grid-body">
+                  <div class="time-column" id="categorize-cal-hours-col"></div>
+
+                  <div class="days-columns-container">
+                    <div class="grid-lines-bg" id="categorize-cal-grid-lines"></div>
+                    <div class="days-columns-container" id="categorize-cal-days-cols"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= ONGLET 3: TABLEAU DE BORD ================= -->
+      <section id="panel-dashboard" class="tab-panel">
+        <div class="dashboard-container">
+          
+          <!-- Top KPI Grid -->
+          <div class="grid-3">
+            <!-- KPI 1: Score d'efficacité -->
+            <div class="card-glass border-primary kpi-card">
+              <div class="kpi-icon-wrapper score-bg">
+                <svg class="kpi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">Score d'Efficacité</span>
+                <h3 id="dashboard-score-val" class="kpi-value text-focus">0 / 100</h3>
+                <p id="dashboard-score-feedback" class="kpi-sub">Chargement...</p>
+              </div>
+            </div>
+
+            <!-- KPI 2: Focus & Concentration -->
+            <div class="card-glass border-success kpi-card">
+              <div class="kpi-icon-wrapper focus-bg">
+                <svg class="kpi-icon text-focus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+                </svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">Temps de Concentration</span>
+                <h3 id="dashboard-focus-val" class="kpi-value text-focus">0 heures</h3>
+                <p id="dashboard-focus-sub" class="kpi-sub">0 blocs de focus</p>
+              </div>
+            </div>
+
+            <!-- KPI 3: Réunions -->
+            <div class="card-glass border-warning kpi-card">
+              <div class="kpi-icon-wrapper meet-bg">
+                <svg class="kpi-icon text-meet-int" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">Temps en Réunion</span>
+                <h3 id="dashboard-meetings-val" class="kpi-value text-meet-int">0 heures</h3>
+                <p id="dashboard-meetings-sub" class="kpi-sub">0% du temps total</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Donut visualization -->
+          <div class="dashboard-chart-wrapper" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <div class="card-glass" style="width: 100%; max-width: 600px;">
+              <h3 class="card-title">🍩 Répartition actuelle du temps</h3>
+              <p class="card-desc">Visualisation de la composition globale de vos heures actives.</p>
+              
+              <div class="chart-content" id="donut-chart-target-container">
+                <!-- Donut Chart injected here dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= ONGLET 4: OPTIMISER ================= -->
+      <section id="panel-simulator" class="tab-panel">
+        <div class="simulator-container">
+          
+          <!-- Sidebar: Target Percentages & Action Plan -->
+          <div class="sidebar-column">
+            
+            <!-- Target slider list -->
+            <div class="card-glass border-primary">
+              <h3 class="card-title text-gradient">🎯 Définir vos objectifs (%)</h3>
+              <p class="card-desc">Répartissez les pourcentages cibles pour chaque type d'activité.</p>
+              
+              <div class="goals-form" id="simulator-goals-form-container">
+                <!-- Target goals dynamic control here -->
+              </div>
+            </div>
+
+            <!-- Optimization Action Plan -->
+            <div class="card-glass border-success optimization-plan-card">
+              <h3 class="card-title">📝 Votre plan d'action d'optimisation</h3>
+              
+              <div id="simulator-actions-plan-container">
+                <!-- Optimization plan list -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right: Interactive Agenda Slider Grid -->
+          <div class="agenda-column">
+            <div class="card-glass border-warning flex-card">
+              
+              <div class="agenda-header-row">
+                <div>
+                  <h3 class="card-title text-gradient">⚡ Ajuster votre planning</h3>
+                  <p class="card-desc">Cliquez directement sur une réunion dans l'agenda pour raccourcir sa durée, changer sa catégorie ou l'annuler.</p>
+                </div>
+                
+                <div class="flex-actions-header">
+                  <div class="week-navigator">
+                    <button class="btn btn-secondary nav-btn" id="simulator-cal-prev">‹ Semaine préc.</button>
+                    <span class="week-label" id="simulator-cal-week-label">Semaine...</span>
+                    <button class="btn btn-secondary nav-btn" id="simulator-cal-next">Semaine suiv. ›</button>
+                  </div>
+                  
+                  <button class="btn btn-secondary btn-sm" id="simulator-reset-btn">
+                    🔄 Réinitialiser tout
+                  </button>
+                </div>
+              </div>
+
+              <!-- Interactive grid -->
+              <div class="calendar-scroll-wrapper">
+                <div class="calendar-grid">
+                  <div class="grid-header-row" id="simulator-cal-days-header"></div>
+
+                  <div class="grid-body">
+                    <div class="time-column" id="simulator-cal-hours-col"></div>
+
+                    <div class="days-columns-container">
+                      <div class="grid-lines-bg" id="simulator-cal-grid-lines"></div>
+                      <div class="days-columns-container" id="simulator-cal-days-cols"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="simulator-empty-state" class="empty-agenda" style="display: none;">
+                Aucun événement dans l'agenda. Chargez des données depuis l'étape d'importation.
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer text-muted">
+      <p>Agenda Efficacité © 2026 — Outil premium d'aide à la productivité en entreprise. Vos données restent locales et confidentielles.</p>
+    </footer>
+
+  </div>
+
+  <!-- ================= POPUP MODALS OVERLAYS ================= -->
+
+  <!-- Modal 1: Add New Event Popup (Import tab grid click) -->
+  <div class="modal-backdrop" id="add-event-modal" style="display: none;">
+    <div class="modal-card card-glass border-primary">
+      <div class="modal-header">
+        <h3 class="modal-title text-gradient">➕ Nouvel événement</h3>
+        <button class="close-modal-btn" id="close-add-modal-btn">✕</button>
+      </div>
+      
+      <form id="add-event-form" class="modal-form">
+        <div class="form-group">
+          <label for="modal-subject">Sujet / Titre de la réunion</label>
+          <input type="text" id="modal-subject" class="input-control" placeholder="ex: Hebdo Projet Alpha" required>
+        </div>
+
+        <div class="grid-3" style="gap: 0.75rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Date</label>
+            <input type="date" id="modal-start-date" class="input-control" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Heure de début</label>
+            <input type="time" id="modal-start-time" class="input-control" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Durée (min)</label>
+            <input type="number" id="modal-duration" class="input-control" min="15" step="15" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancel-add-modal-btn">Annuler</button>
+          <button type="submit" class="btn btn-primary" id="save-add-modal-btn">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Categorization Choice Modal (Categorize tab block click) -->
+  <div class="modal-backdrop" id="categorize-event-modal" style="display: none;">
+    <div class="modal-card card-glass border-primary">
+      <div class="modal-header">
+        <h3 class="modal-title text-gradient">🏷️ Classer l'événement</h3>
+        <button class="close-modal-btn" id="close-cat-modal-btn">✕</button>
+      </div>
+      
+      <div class="modal-event-preview">
+        <h4 class="preview-subject" id="cat-preview-subject">Sujet...</h4>
+        <div class="preview-meta">
+          <span id="cat-preview-date">📅 ...</span>
+          <span id="cat-preview-time">⏰ ...</span>
+        </div>
+      </div>
+
+      <!-- Categories Selection Grid -->
+      <div class="categorization-choices">
+        <label class="section-label">Sélectionner une catégorie :</label>
+        <div class="categories-btn-grid" id="cat-selection-grid">
+          <!-- Generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Accordion custom category creator -->
+      <div class="custom-category-accordion">
+        <button type="button" class="accordion-header" id="custom-cat-accordion-toggle">
+          <span id="accordion-arrow">▼</span> ➕ Créer une catégorie personnalisée
+        </button>
+        
+        <div class="accordion-content" id="custom-cat-accordion-content" style="display: none;">
+          <div class="form-group">
+            <label>Nom de la catégorie</label>
+            <input type="text" id="new-cat-name" placeholder="ex: R&D, Client Spécifique, Recrutement..." class="input-control">
+          </div>
+          
+          <div class="form-group">
+            <label>Couleur</label>
+            <div class="color-palette-picker" id="new-cat-color-picker">
+              <!-- Colors injected dynamically -->
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary w-full btn-sm" id="create-custom-cat-btn" disabled>
+            Créer et classer l'événement
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary w-full" id="cancel-cat-modal-btn">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Simulation What-If Popup (Simulator tab block click) -->
+  <div class="modal-backdrop" id="simulator-adjustments-modal" style="display: none;">
+    <div class="modal-card card-glass border-primary">
+      
+      <div class="modal-header">
+        <h3 class="modal-title text-gradient">⚡ Ajustements de Simulation</h3>
+        <button class="close-modal-btn" id="close-sim-modal-btn">✕</button>
+      </div>
+      
+      <div class="modal-event-preview" id="sim-modal-preview-card" style="border-left: 4px solid var(--cat-uncategorized);">
+        <h4 class="preview-subject" id="sim-preview-subject">Sujet...</h4>
+        <div class="preview-meta">
+          <span id="sim-preview-date">📅 ...</span>
+          <span id="sim-preview-time">⏰ ...</span>
+        </div>
+        
+        <div id="sim-preview-badge-deleted" class="badge btn-danger pulse" style="margin-top: 0.5rem; display: none;">
+          ❌ Événement Annulé (Simulation)
+        </div>
+        <div id="sim-preview-badge-modified" class="badge bg-warning" style="margin-top: 0.5rem; display: none; color: #0b0f19; font-weight: bold;">
+          ⚠️ Modifié
+        </div>
+      </div>
+
+      <!-- Categories Selection Grid -->
+      <div class="categorization-choices">
+        <label class="section-label">Catégorie de l'événement :</label>
+        <div class="categories-btn-grid" id="sim-cat-selection-grid">
+          <!-- Generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Duration slider -->
+      <div class="modal-duration-control">
+        <label class="section-label">Ajuster la durée de la réunion :</label>
+        
+        <div class="duration-flex-row">
+          <button class="btn btn-secondary btn-sm" style="padding: 0.35rem 0.75rem;" id="sim-duration-minus">
+            ⏱️ -15m
+          </button>
+          <div class="duration-badge-display">
+            <span class="duration-number" id="sim-duration-text">60</span> min
+          </div>
+          <button class="btn btn-secondary btn-sm" style="padding: 0.35rem 0.75rem;" id="sim-duration-plus">
+            ⏱️ +15m
+          </button>
+        </div>
+
+        <div class="slider-container">
+          <input type="range" min="15" max="480" step="15" value="60" id="sim-duration-slider" class="duration-slider">
+          <div class="slider-ticks">
+            <span>15m</span>
+            <span>2h (120m)</span>
+            <span>4h (240m)</span>
+            <span>6h (360m)</span>
+            <span>8h (480m)</span>
+          </div>
+        </div>
+
+        <p class="original-info-sub" id="sim-original-duration-text" style="display: none;">
+          Durée initiale : 60 min
+        </p>
+      </div>
+
+      <!-- Virtual cancel button -->
+      <div class="modal-cancel-control">
+        <label class="section-label">Statut de présence :</label>
+        <button class="btn w-full btn-danger" id="sim-cancel-presence-btn">
+          ❌ Annuler / Supprimer de l'agenda
+        </button>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary w-full" id="close-sim-modal-btn-footer">Terminer</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= LOGIQUE JS INTERACTIVE DE L'APPLICATION ================= -->
+  <script>
+    // --- STATE 1: CATEGORIES ---
+    class CategoryState {
+      constructor() {
+        this.defaultCategories = [
+          {
+            key: 'focus',
+            label: 'Focus / Concentration',
+            color: 'focus',
+            colorHex: '#10b981',
+            isDefault: true,
+            keywords: [
+              'focus', 'concentration', 'deep work', 'développement', 'developpement', 'code', 'dev', 'code review',
+              'rédaction', 'redaction', 'analyse', 'conception', 'création', 'creation', 'écriture', 'ecriture',
+              'étude', 'etude', 'recherche', 'prod', 'production', 'travail individuel', 'concocter', 'réfléchir',
+              'design', 'maquette', 'architecture'
+            ]
+          },
+          {
+            key: 'meet-int',
+            label: 'Réunion Interne',
+            color: 'meet-int',
+            colorHex: '#6366f1',
+            isDefault: true,
+            keywords: [
+              'sync', 'hebdo', 'équipe', 'equipe', 'point', 'cadrage', 'crd', 'comité', 'comite', 'one-on-one', '1-on-1',
+              '1to1', '1-1', 'daily', 'standup', 'sprint', 'rétrospective', 'retrospective', 'revue', 'alignement',
+              'synchro', 'bureau', 'réunion interne', 'reunion interne'
+            ]
+          },
+          {
+            key: 'meet-ext',
+            label: 'Réunion Externe',
+            color: 'meet-ext',
+            colorHex: '#a855f7',
+            isDefault: true,
+            keywords: [
+              'client', 'partenaire', 'externe', 'démo', 'demo', 'pitch', 'vente', 'négociation', 'negociation',
+              'prestataire', 'fournisseur', 'soutenance', 'kickoff', 'lancement', 'atelier client', 'rendez-vous', 'rdv'
+            ]
+          },
+          {
+            key: 'admin',
+            label: 'Administratif / E-mails',
+            color: 'admin',
+            colorHex: '#3b82f6',
+            isDefault: true,
+            keywords: [
+              'admin', 'administratif', 'e-mail', 'email', 'emails', 'courrier', 'facture', 'note de frais', 'saisie',
+              'compte rendu', 'planning', 'organisation', 'rh', 'formation', 'reporting', 'rapport'
+            ]
+          },
+          {
+            key: 'pause',
+            label: 'Pause / Temps Perso',
+            color: 'pause',
+            colorHex: '#f59e0b',
+            isDefault: true,
+            keywords: [
+              'pause', 'déjeuner', 'dejeuner', 'lunch', 'café', 'cafe', 'perso', 'personnel', 'dentiste', 'médecin',
+              'medecin', 'sport', 'gym', 'break', 'repos', 'sieste', 'trajet', 'déplacement', 'deplacement'
+            ]
+          },
+          {
+            key: 'uncategorized',
+            label: 'Non catégorisé',
+            color: 'uncategorized',
+            colorHex: '#6b7280',
+            isDefault: true,
+            keywords: []
+          }
+        ];
+        this.categories = [];
+        this.subscribers = [];
+        this.loadCategories();
+      }
+
+      subscribe(callback) {
+        this.subscribers.push(callback);
+        callback(this.categories);
+      }
+
+      notify() {
+        this.subscribers.forEach(cb => cb(this.categories));
+      }
+
+      loadCategories() {
+        const saved = localStorage.getItem('agenda_categories');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const merged = this.defaultCategories.map(def => {
+              const found = parsed.find(p => p.key === def.key);
+              return found ? { ...def, ...found } : def;
+            });
+            const custom = parsed.filter(p => !p.isDefault);
+            this.categories = [...merged, ...custom];
+          } catch (e) {
+            this.categories = [...this.defaultCategories];
+          }
+        } else {
+          this.categories = [...this.defaultCategories];
+        }
+      }
+
+      saveCategories() {
+        localStorage.setItem('agenda_categories', JSON.stringify(this.categories));
+        this.notify();
+      }
+
+      getCategories() {
+        return this.categories;
+      }
+
+      addCustomCategory(label, colorHex) {
+        const key = 'custom-' + Date.now();
+        const newCat = {
+          key,
+          label,
+          color: 'custom',
+          colorHex,
+          isDefault: false,
+          keywords: label.toLowerCase().split(/\s+/)
+        };
+        const uncategorizedIdx = this.categories.findIndex(c => c.key === 'uncategorized');
+        if (uncategorizedIdx !== -1) {
+          this.categories.splice(uncategorizedIdx, 0, newCat);
+        } else {
+          this.categories.push(newCat);
+        }
+        this.saveCategories();
+        return newCat;
+      }
+
+      removeCustomCategory(key) {
+        if (key.startsWith('custom-')) {
+          this.categories = this.categories.filter(c => c.key !== key);
+          this.saveCategories();
+        }
+      }
+
+      suggestCategory(subject) {
+        if (!subject) return 'uncategorized';
+        const lowerSubject = subject.toLowerCase();
+        for (const cat of this.categories) {
+          if (cat.key === 'uncategorized') continue;
+          for (const keyword of cat.keywords) {
+            const escapedKeyword = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const regex = new RegExp(`\\b${escapedKeyword}\\b|${escapedKeyword}`, 'i');
+            if (regex.test(lowerSubject)) {
+              return cat.key;
+            }
+          }
+        }
+        return 'uncategorized';
+      }
+    }
+
+    // --- STATE 2: AGENDA / SIMULATIONS ---
+    class AgendaState {
+      constructor(categoryState) {
+        this.categoryState = categoryState;
+        this.originalEvents = [];
+        this.simulatedEvents = [];
+        this.goal = {
+          percentages: {
+            'focus': 40,
+            'meet-int': 25,
+            'meet-ext': 15,
+            'admin': 10,
+            'pause': 10
+          }
+        };
+        this.subscribersEvents = [];
+        this.subscribersGoal = [];
+        this.loadState();
+      }
+
+      subscribeEvents(callback) {
+        this.subscribersEvents.push(callback);
+        callback(this.simulatedEvents);
+      }
+
+      subscribeOriginalEvents(callback) {
+        // Callback helper designed for sync
+        this.originalEventsSubscribers = this.originalEventsSubscribers || [];
+        this.originalEventsSubscribers.push(callback);
+        callback(this.originalEvents);
+      }
+
+      subscribeGoal(callback) {
+        this.subscribersGoal.push(callback);
+        callback(this.goal);
+      }
+
+      notify() {
+        this.subscribersEvents.forEach(cb => cb(this.simulatedEvents));
+        if (this.originalEventsSubscribers) {
+          this.originalEventsSubscribers.forEach(cb => cb(this.originalEvents));
+        }
+      }
+
+      notifyGoal() {
+        this.subscribersGoal.forEach(cb => cb(this.goal));
+      }
+
+      loadState() {
+        const savedOriginal = localStorage.getItem('agenda_original_events');
+        const savedSimulated = localStorage.getItem('agenda_simulated_events');
+        const savedGoal = localStorage.getItem('agenda_efficiency_goal');
+
+        if (savedOriginal) {
+          try { this.originalEvents = JSON.parse(savedOriginal); } catch(e) {}
+        }
+        if (savedSimulated) {
+          try { this.simulatedEvents = JSON.parse(savedSimulated); } catch(e) {}
+        }
+        if (savedGoal) {
+          try { this.goal = JSON.parse(savedGoal); } catch(e) {}
+        }
+      }
+
+      saveState() {
+        localStorage.setItem('agenda_original_events', JSON.stringify(this.originalEvents));
+        localStorage.setItem('agenda_simulated_events', JSON.stringify(this.simulatedEvents));
+        localStorage.setItem('agenda_efficiency_goal', JSON.stringify(this.goal));
+        this.notify();
+      }
+
+      setEvents(events) {
+        this.originalEvents = events;
+        this.simulatedEvents = events.map(e => ({ ...e }));
+        this.saveState();
+      }
+
+      setGoal(goal) {
+        this.goal = goal;
+        localStorage.setItem('agenda_efficiency_goal', JSON.stringify(this.goal));
+        this.notifyGoal();
+        this.notify(); // Recompute stats
+      }
+
+      clearAgenda() {
+        this.originalEvents = [];
+        this.simulatedEvents = [];
+        this.saveState();
+      }
+
+      resetSimulation() {
+        this.simulatedEvents = this.originalEvents.map(e => ({
+          ...e,
+          durationMinutes: e.originalDurationMinutes,
+          categoryKey: e.originalCategoryKey,
+          isDeleted: false,
+          isModified: false
+        }));
+        this.saveState();
+      }
+
+      updateEventCategory(eventId, categoryKey) {
+        this.simulatedEvents = this.simulatedEvents.map(e => {
+          if (e.id === eventId) {
+            const isModified = categoryKey !== e.originalCategoryKey || e.durationMinutes !== e.originalDurationMinutes;
+            return {
+              ...e,
+              categoryKey,
+              isModified
+            };
+          }
+          return e;
+        });
+        this.saveState();
+      }
+
+      updateEventDuration(eventId, durationMinutes) {
+        this.simulatedEvents = this.simulatedEvents.map(e => {
+          if (e.id === eventId) {
+            const [h, m] = e.startTime.split(':').map(Number);
+            const startMinutes = h * 60 + m;
+            const endMinutesTotal = startMinutes + durationMinutes;
+            const endH = Math.floor(endMinutesTotal / 60) % 24;
+            const endM = endMinutesTotal % 60;
+            const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+            const isModified = e.categoryKey !== e.originalCategoryKey || durationMinutes !== e.originalDurationMinutes;
+            return {
+              ...e,
+              durationMinutes,
+              endTime,
+              isModified
+            };
+          }
+          return e;
+        });
+        this.saveState();
+      }
+
+      toggleEventDeleted(eventId) {
+        this.simulatedEvents = this.simulatedEvents.map(e => {
+          if (e.id === eventId) {
+            const isDeleted = !e.isDeleted;
+            return {
+              ...e,
+              isDeleted,
+              isModified: isDeleted || e.categoryKey !== e.originalCategoryKey || e.durationMinutes !== e.originalDurationMinutes
+            };
+          }
+          return e;
+        });
+        this.saveState();
+      }
+
+      addManualEvent(eventData) {
+        const id = 'manual-' + Date.now();
+        const newEvent = {
+          ...eventData,
+          id,
+          originalDurationMinutes: eventData.durationMinutes,
+          originalCategoryKey: eventData.categoryKey,
+          isDeleted: false,
+          isModified: false
+        };
+        this.originalEvents.push(newEvent);
+        this.simulatedEvents.push({ ...newEvent });
+        this.saveState();
+      }
+
+      deleteEventPermanently(eventId) {
+        this.originalEvents = this.originalEvents.filter(e => e.id !== eventId);
+        this.simulatedEvents = this.simulatedEvents.filter(e => e.id !== eventId);
+        this.saveState();
+      }
+
+      calculateStats(events) {
+        const activeEvents = events.filter(e => !e.isDeleted);
+        const categories = this.categoryState.getCategories();
+        
+        const hoursByCategory = {};
+        categories.forEach(c => hoursByCategory[c.key] = 0);
+        
+        let totalMinutes = 0;
+        let meetingMinutes = 0;
+        let focusMinutes = 0;
+
+        activeEvents.forEach(e => {
+          const mins = e.durationMinutes;
+          totalMinutes += mins;
+          
+          const key = e.categoryKey || 'uncategorized';
+          if (hoursByCategory[key] !== undefined) {
+            hoursByCategory[key] += mins;
+          } else {
+            hoursByCategory[key] = mins;
+          }
+
+          if (key !== 'focus' && key !== 'pause' && key !== 'uncategorized') {
+            meetingMinutes += mins;
+          } else if (key === 'focus') {
+            focusMinutes += mins;
+          }
+        });
+
+        const totalHours = totalMinutes / 60;
+        const hoursReport = {};
+        const percentagesByCategory = {};
+
+        categories.forEach(c => {
+          const mins = hoursByCategory[c.key] || 0;
+          hoursReport[c.key] = parseFloat((mins / 60).toFixed(2));
+          percentagesByCategory[c.key] = totalMinutes > 0 ? Math.round((mins / totalMinutes) * 100) : 0;
+        });
+
+        if (totalMinutes > 0) {
+          const sum = Object.values(percentagesByCategory).reduce((a, b) => a + b, 0);
+          if (sum !== 100 && sum > 0) {
+            const keys = Object.keys(percentagesByCategory);
+            const maxKey = keys.reduce((a, b) => percentagesByCategory[a] > percentagesByCategory[b] ? a : b);
+            percentagesByCategory[maxKey] += (100 - sum);
+          }
+        }
+
+        const focusBlocksCount = this.calculateFocusBlocks(activeEvents);
+        const efficiencyScore = this.calculateEfficiencyScore(totalMinutes, focusMinutes, meetingMinutes, focusBlocksCount);
+
+        return {
+          totalHours: parseFloat(totalHours.toFixed(1)),
+          hoursByCategory: hoursReport,
+          percentagesByCategory,
+          meetingHours: parseFloat((meetingMinutes / 60).toFixed(1)),
+          focusHours: parseFloat((focusMinutes / 60).toFixed(1)),
+          focusBlocksCount,
+          efficiencyScore
+        };
+      }
+
+      calculateFocusBlocks(events) {
+        const focusEvents = events.filter(e => e.categoryKey === 'focus');
+        if (focusEvents.length === 0) return 0;
+
+        const sorted = [...focusEvents].sort((a, b) => {
+          const dateTimeA = new Date(`${a.startDate}T${a.startTime}`).getTime();
+          const dateTimeB = new Date(`${b.startDate}T${b.startTime}`).getTime();
+          return dateTimeA - dateTimeB;
+        });
+
+        let blocksCount = 0;
+        let currentBlockDuration = 0;
+        let lastEventEnd = null;
+
+        sorted.forEach(e => {
+          const startMs = new Date(`${e.startDate}T${e.startTime}`).getTime();
+          const durationMs = e.durationMinutes * 60 * 1000;
+          const endMs = startMs + durationMs;
+
+          if (lastEventEnd === null) {
+            currentBlockDuration = e.durationMinutes;
+          } else {
+            const gapMins = (startMs - lastEventEnd) / (1000 * 60);
+            if (gapMins <= 15) {
+              currentBlockDuration += e.durationMinutes;
+            } else {
+              if (currentBlockDuration >= 90) {
+                blocksCount++;
+              }
+              currentBlockDuration = e.durationMinutes;
+            }
+          }
+          lastEventEnd = endMs;
+        });
+
+        if (currentBlockDuration >= 90) {
+          blocksCount++;
+        }
+
+        return blocksCount;
+      }
+
+      calculateEfficiencyScore(totalMins, focusMins, meetMins, focusBlocks) {
+        if (totalMins === 0) return 0;
+
+        const focusPct = (focusMins / totalMins) * 100;
+        const meetPct = (meetMins / totalMins) * 100;
+        const goal = this.goal.percentages;
+
+        let score = 75;
+
+        const targetFocus = goal['focus'] || 40;
+        const focusDiff = focusPct - targetFocus;
+        if (focusDiff >= 0) {
+          score += Math.min(15, focusDiff * 0.5);
+        } else {
+          score -= Math.abs(focusDiff) * 1.0;
+        }
+
+        let targetMeetings = 0;
+        Object.keys(goal).forEach(k => {
+          if (k !== 'focus' && k !== 'pause' && k !== 'uncategorized') {
+            targetMeetings += goal[k] || 0;
+          }
+        });
+        const meetDiff = meetPct - targetMeetings;
+        if (meetDiff > 0) {
+          score -= meetDiff * 0.8;
+        } else {
+          score += Math.min(10, Math.abs(meetDiff) * 0.3);
+        }
+
+        if (focusBlocks === 0 && focusPct > 10) {
+          score -= 15;
+        } else if (focusBlocks >= 3) {
+          score += 10;
+        } else if (focusBlocks >= 1) {
+          score += 5;
+        }
+
+        return Math.max(0, Math.min(100, Math.round(score)));
+      }
+
+      getOptimizationActions() {
+        const original = this.originalEvents;
+        const simulated = this.simulatedEvents;
+        const actions = [];
+
+        simulated.forEach(simEvent => {
+          const origEvent = original.find(o => o.id === simEvent.id);
+          if (!origEvent) return;
+
+          if (simEvent.isDeleted) {
+            actions.push({
+              eventId: simEvent.id,
+              subject: simEvent.subject,
+              type: 'suppression',
+              description: `Supprimer la réunion « ${simEvent.subject} » (${origEvent.durationMinutes} min libérées)`
+            });
+          } else {
+            if (simEvent.durationMinutes < origEvent.durationMinutes) {
+              const delta = origEvent.durationMinutes - simEvent.durationMinutes;
+              actions.push({
+                eventId: simEvent.id,
+                subject: simEvent.subject,
+                type: 'raccourcissement',
+                description: `Raccourcir la réunion « ${simEvent.subject} » de ${origEvent.durationMinutes} min à ${simEvent.durationMinutes} min (gain de ${delta} min)`
+              });
+            }
+            if (simEvent.categoryKey !== origEvent.categoryKey) {
+              const oldLabel = this.categoryState.getCategories().find(c => c.key === origEvent.categoryKey)?.label || 'Non classé';
+              const newLabel = this.categoryState.getCategories().find(c => c.key === simEvent.categoryKey)?.label || 'Non classé';
+              actions.push({
+                eventId: simEvent.id,
+                subject: simEvent.subject,
+                type: 'recategorisation',
+                description: `Reclasser « ${simEvent.subject} » de "${oldLabel}" à "${newLabel}"`
+              });
+            }
+          }
+        });
+
+        return actions;
+      }
+
+      parseOutlookCSV(csvText) {
+        if (!csvText || csvText.trim() === '') return [];
+
+        const firstLine = csvText.split('\n')[0];
+        const delimiter = firstLine.split(';').length > firstLine.split(',').length ? ';' : ',';
+
+        const lines = [];
+        let currentLine = [];
+        let currentField = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < csvText.length; i++) {
+          const char = csvText[i];
+          const nextChar = csvText[i + 1];
+
+          if (inQuotes) {
+            if (char === '"') {
+              if (nextChar === '"') {
+                currentField += '"';
+                i++;
+              } else {
+                inQuotes = false;
+              }
+            } else {
+              currentField += char;
+            }
+          } else {
+            if (char === '"') {
+              inQuotes = true;
+            } else if (char === delimiter) {
+              currentLine.push(currentField.trim());
+              currentField = '';
+            } else if (char === '\r' || char === '\n') {
+              if (char === '\r' && nextChar === '\n') {
+                i++;
+              }
+              currentLine.push(currentField.trim());
+              lines.push(currentLine);
+              currentLine = [];
+              currentField = '';
+            } else {
+              currentField += char;
+            }
+          }
+        }
+        
+        if (currentField !== '' || currentLine.length > 0) {
+          currentLine.push(currentField.trim());
+          lines.push(currentLine);
+        }
+
+        if (lines.length <= 1) return [];
+
+        const headers = lines[0].map(h => h.toLowerCase().trim());
+        const rawData = lines.slice(1).filter(l => l.length >= Math.min(3, headers.length));
+
+        const findHeaderIndex = (keys) => {
+          return headers.findIndex(h => keys.some(key => h.includes(key)));
+        };
+
+        const idxSubject = findHeaderIndex(['sujet', 'subject', 'objet', 'title', 'titre']);
+        const idxStartDate = findHeaderIndex(['date de début', 'date de debut', 'start date', 'début', 'debut', 'start']);
+        const idxStartTime = findHeaderIndex(['heure de début', 'heure de debut', 'start time']);
+        const idxEndDate = findHeaderIndex(['date de fin', 'end date', 'fin', 'end']);
+        const idxEndTime = findHeaderIndex(['heure de fin', 'end time']);
+        const idxDuration = findHeaderIndex(['durée', 'duree', 'duration']);
+
+        const events = [];
+
+        rawData.forEach((row, rowIndex) => {
+          if (row.length === 0 || (row.length === 1 && row[0] === '')) return;
+
+          const subject = idxSubject !== -1 && row[idxSubject] ? row[idxSubject] : 'Sans titre';
+          
+          let rawStartDate = idxStartDate !== -1 ? row[idxStartDate] : '';
+          let startTime = idxStartTime !== -1 ? row[idxStartTime] : '09:00';
+          
+          if (!rawStartDate) return;
+
+          if (rawStartDate.includes(' ') && (startTime === '09:00' || idxStartTime === -1)) {
+            const parts = rawStartDate.split(' ');
+            rawStartDate = parts[0];
+            startTime = parts[1] ? parts[1].substring(0, 5) : '09:00';
+          }
+
+          const startDate = this.standardizeDate(rawStartDate);
+          startTime = this.standardizeTime(startTime);
+
+          let rawEndDate = idxEndDate !== -1 ? row[idxEndDate] : rawStartDate;
+          if (rawEndDate.includes(' ')) {
+            rawEndDate = rawEndDate.split(' ')[0];
+          }
+          const endDate = this.standardizeDate(rawEndDate || rawStartDate);
+          let endTime = idxEndTime !== -1 ? row[idxEndTime] : '';
+          if (endTime.includes(' ')) {
+            endTime = endTime.split(' ')[1];
+          }
+          endTime = this.standardizeTime(endTime || this.addMinutesToTime(startTime, 60));
+
+          let durationMinutes = 60;
+          if (idxDuration !== -1 && row[idxDuration]) {
+            const durVal = row[idxDuration].replace(/[^\d:]/g, '');
+            if (durVal.includes(':')) {
+              const [h, m] = durVal.split(':').map(Number);
+              durationMinutes = h * 60 + m;
+            } else {
+              durationMinutes = parseInt(durVal, 10) || 60;
+            }
+          } else {
+            try {
+              const startDT = new Date(`${startDate}T${startTime}`);
+              const endDT = new Date(`${endDate}T${endTime}`);
+              const diffMs = endDT.getTime() - startDT.getTime();
+              if (diffMs > 0) {
+                durationMinutes = Math.round(diffMs / (1000 * 60));
+              }
+            } catch (e) {
+              durationMinutes = 60;
+            }
+          }
+
+          const categoryKey = 'uncategorized';
+
+          events.push({
+            id: `csv-${rowIndex}-${Date.now()}`,
+            subject,
+            startDate,
+            startTime,
+            endDate,
+            endTime,
+            durationMinutes,
+            categoryKey,
+            originalDurationMinutes: durationMinutes,
+            originalCategoryKey: categoryKey,
+            isDeleted: false,
+            isModified: false
+          });
+        });
+
+        return events;
+      }
+
+      standardizeDate(dateStr) {
+        if (!dateStr) return new Date().toISOString().split('T')[0];
+        const cleaned = dateStr.trim().replace(/[^\d\/\-]/g, '');
+        const parts = cleaned.split(/[\/\-]/);
+        if (parts.length === 3) {
+          if (parts[0].length === 4) {
+            return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+          } else {
+            const day = parts[0].padStart(2, '0');
+            const month = parts[1].padStart(2, '0');
+            const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+            return `${year}-${month}-${day}`;
+          }
+        }
+        return new Date().toISOString().split('T')[0];
+      }
+
+      standardizeTime(timeStr) {
+        if (!timeStr) return '09:00';
+        let cleaned = timeStr.trim();
+        const isPM = cleaned.toLowerCase().includes('pm');
+        const isAM = cleaned.toLowerCase().includes('am');
+        cleaned = cleaned.replace(/[^\d:]/g, '');
+        const parts = cleaned.split(':');
+        if (parts.length >= 2) {
+          let h = parseInt(parts[0], 10);
+          const m = parts[1].substring(0, 2).padStart(2, '0');
+          if (isPM && h < 12) h += 12;
+          if (isAM && h === 12) h = 0;
+          return `${String(h).padStart(2, '0')}:${m}`;
+        } else if (parts.length === 1 && parts[0] !== '') {
+          const h = parseInt(parts[0], 10);
+          return `${String(h).padStart(2, '0')}:00`;
+        }
+        return '09:00';
+      }
+
+      addMinutesToTime(timeStr, minutes) {
+        const [h, m] = timeStr.split(':').map(Number);
+        const totalMins = h * 60 + m + minutes;
+        const nextH = Math.floor(totalMins / 60) % 24;
+        const nextM = totalMins % 60;
+        return `${String(nextH).padStart(2, '0')}:${String(nextM).padStart(2, '0')}`;
+      }
+    }
+
+    // --- APPLICATION MAIN CONTROLLER ---
+    class AppController {
+      constructor() {
+        this.categoryState = new CategoryState();
+        this.agendaState = new AgendaState(this.categoryState);
+        
+        this.currentTab = 'import';
+        this.calendarDate = new Date();
+        this.dragActive = false;
+        
+        // Temp imports csv store
+        this.parsedEvents = [];
+
+        // Color palette for custom category creation
+        this.colorPalette = [
+          '#10b981', // Émeraude (Focus)
+          '#6366f1', // Indigo (Interne)
+          '#a855f7', // Violet (Externe)
+          '#3b82f6', // Bleu (Admin)
+          '#f59e0b', // Ambre (Pause)
+          '#ec4899', // Rose
+          '#f43f5e', // Corail
+          '#06b6d4'  // Cyan
+        ];
+        this.selectedColor = '#ec4899';
+
+        // Categorize tab states
+        this.searchQuery = '';
+        this.filterCategory = 'all';
+
+        // Modals state
+        this.selectedEventForCat = null;
+        this.selectedEventForSim = null;
+        
+        this.initDomReferences();
+        this.initEventBindings();
+        
+        // Dynamic subscriber bindings
+        this.categoryState.subscribe(cats => {
+          this.renderCategoryLists();
+          this.renderCalendars();
+        });
+        
+        this.agendaState.subscribeEvents(events => {
+          this.updateGlobalStateViews(events);
+        });
+
+        this.agendaState.subscribeOriginalEvents(events => {
+          this.renderCalendars();
+        });
+
+        this.agendaState.subscribeGoal(goal => {
+          this.renderGoalsAndSliders();
+        });
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme_preference') || 'dark';
+        if (savedTheme === 'light') {
+          document.body.classList.remove('dark-theme');
+          document.body.classList.add('light-theme');
+          this.themeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+        }
+      }
+
+      initDomReferences() {
+        // Layout Elements
+        this.themeToggleBtn = document.getElementById('theme-toggle-btn');
+        this.themeIcon = document.getElementById('theme-icon');
+        this.headerClearBtn = document.getElementById('header-clear-btn');
+        this.tabButtons = document.querySelectorAll('.tab-button');
+        this.tabPanels = document.querySelectorAll('.tab-panel');
+
+        // Tab 1 Elements
+        this.dropzone = document.getElementById('dropzone');
+        this.dropzoneLabel = document.getElementById('dropzone-label');
+        this.fileInput = document.getElementById('file-input');
+        this.loadDemoBtn = document.getElementById('load-demo-btn');
+        this.confirmImportBtn = document.getElementById('confirm-import-btn');
+        this.importCountBadge = document.getElementById('import-count-badge');
+        
+        // Tab 2 Elements
+        this.categorizeSearch = document.getElementById('categorize-search');
+        this.categorizeFiltersRow = document.getElementById('categorize-filters-row');
+        this.customCatsListContainer = document.getElementById('custom-cats-list-container');
+        this.categorizeProgressText = document.getElementById('categorize-progress-text');
+        this.categorizeProgressFill = document.getElementById('categorize-progress-fill');
+
+        // Tab 3 Elements
+        this.dashboardScoreVal = document.getElementById('dashboard-score-val');
+        this.dashboardScoreFeedback = document.getElementById('dashboard-score-feedback');
+        this.dashboardFocusVal = document.getElementById('dashboard-focus-val');
+        this.dashboardFocusSub = document.getElementById('dashboard-focus-sub');
+        this.dashboardMeetingsVal = document.getElementById('dashboard-meetings-val');
+        this.dashboardMeetingsSub = document.getElementById('dashboard-meetings-sub');
+        this.donutChartTargetContainer = document.getElementById('donut-chart-target-container');
+
+        // Tab 4 Elements
+        this.simulatorGoalsFormContainer = document.getElementById('simulator-goals-form-container');
+        this.simulatorActionsPlanContainer = document.getElementById('simulator-actions-plan-container');
+        this.simulatorResetBtn = document.getElementById('simulator-reset-btn');
+        this.simulatorEmptyState = document.getElementById('simulator-empty-state');
+
+        // Calendar views wrappers
+        this.calWrappers = {
+          import: {
+            daysHeader: document.getElementById('import-cal-days-header'),
+            hoursCol: document.getElementById('import-cal-hours-col'),
+            gridLines: document.getElementById('import-cal-grid-lines'),
+            daysCols: document.getElementById('import-cal-days-cols'),
+            weekLabel: document.getElementById('import-cal-week-label'),
+            prevBtn: document.getElementById('import-cal-prev'),
+            nextBtn: document.getElementById('import-cal-next')
+          },
+          categorize: {
+            daysHeader: document.getElementById('categorize-cal-days-header'),
+            hoursCol: document.getElementById('categorize-cal-hours-col'),
+            gridLines: document.getElementById('categorize-cal-grid-lines'),
+            daysCols: document.getElementById('categorize-cal-days-cols'),
+            weekLabel: document.getElementById('categorize-cal-week-label'),
+            prevBtn: document.getElementById('categorize-cal-prev'),
+            nextBtn: document.getElementById('categorize-cal-next')
+          },
+          simulator: {
+            daysHeader: document.getElementById('simulator-cal-days-header'),
+            hoursCol: document.getElementById('simulator-cal-hours-col'),
+            gridLines: document.getElementById('simulator-cal-grid-lines'),
+            daysCols: document.getElementById('simulator-cal-days-cols'),
+            weekLabel: document.getElementById('simulator-cal-week-label'),
+            prevBtn: document.getElementById('simulator-cal-prev'),
+            nextBtn: document.getElementById('simulator-cal-next')
+          }
+        };
+
+        // Modals Elements
+        this.addEventModal = document.getElementById('add-event-modal');
+        this.addEventForm = document.getElementById('add-event-form');
+        this.modalSubject = document.getElementById('modal-subject');
+        this.modalStartDate = document.getElementById('modal-start-date');
+        this.modalStartTime = document.getElementById('modal-start-time');
+        this.modalDuration = document.getElementById('modal-duration');
+        this.closeAddModalBtn = document.getElementById('close-add-modal-btn');
+        this.cancelAddModalBtn = document.getElementById('cancel-add-modal-btn');
+
+        this.categorizeEventModal = document.getElementById('categorize-event-modal');
+        this.catPreviewSubject = document.getElementById('cat-preview-subject');
+        this.catPreviewDate = document.getElementById('cat-preview-date');
+        this.catPreviewTime = document.getElementById('cat-preview-time');
+        this.catSelectionGrid = document.getElementById('cat-selection-grid');
+        this.customCatAccordionToggle = document.getElementById('custom-cat-accordion-toggle');
+        this.customCatAccordionContent = document.getElementById('custom-cat-accordion-content');
+        this.newCatName = document.getElementById('new-cat-name');
+        this.newCatColorPicker = document.getElementById('new-cat-color-picker');
+        this.createCustomCatBtn = document.getElementById('create-custom-cat-btn');
+        this.closeCatModalBtn = document.getElementById('close-cat-modal-btn');
+        this.cancelCatModalBtn = document.getElementById('cancel-cat-modal-btn');
+
+        this.simulatorAdjustmentsModal = document.getElementById('simulator-adjustments-modal');
+        this.simModalPreviewCard = document.getElementById('sim-modal-preview-card');
+        this.simPreviewSubject = document.getElementById('sim-preview-subject');
+        this.simPreviewDate = document.getElementById('sim-preview-date');
+        this.simPreviewTime = document.getElementById('sim-preview-time');
+        this.simPreviewBadgeDeleted = document.getElementById('sim-preview-badge-deleted');
+        this.simPreviewBadgeModified = document.getElementById('sim-preview-badge-modified');
+        this.simCatSelectionGrid = document.getElementById('sim-cat-selection-grid');
+        this.simDurationMinus = document.getElementById('sim-duration-minus');
+        this.simDurationPlus = document.getElementById('sim-duration-plus');
+        this.simDurationText = document.getElementById('sim-duration-text');
+        this.simDurationSlider = document.getElementById('sim-duration-slider');
+        this.simOriginalDurationText = document.getElementById('sim-original-duration-text');
+        this.simCancelPresenceBtn = document.getElementById('sim-cancel-presence-btn');
+        this.closeSimModalBtn = document.getElementById('close-sim-modal-btn');
+        this.closeSimModalBtnFooter = document.getElementById('close-sim-modal-btn-footer');
+      }
+
+      initEventBindings() {
+        // Theme Switcher
+        this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+
+        // Header Clear button
+        this.headerClearBtn.addEventListener('click', () => {
+          if (confirm('Êtes-vous sûr de vouloir vider l\'agenda actuel ? Toutes vos simulations seront effacées.')) {
+            this.agendaState.clearAgenda();
+          }
+        });
+
+        // Navigation Tabs Bindings
+        this.tabButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            this.switchTab(tabId);
+          });
+        });
+
+        // Tab 1 File Upload Bindings
+        this.dropzone.addEventListener('click', () => this.fileInput.click());
+        this.fileInput.addEventListener('change', (e) => this.handleFileInput(e));
+        this.dropzone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          this.dropzone.classList.add('active');
+        });
+        this.dropzone.addEventListener('dragleave', () => this.dropzone.classList.remove('active'));
+        this.dropzone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          this.dropzone.classList.remove('active');
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            this.handleFile(e.dataTransfer.files[0]);
+          }
+        });
+
+        // Load Demo and Confirm Import
+        this.loadDemoBtn.addEventListener('click', () => this.loadDemoData());
+        this.confirmImportBtn.addEventListener('click', () => this.confirmImport());
+
+        // Tab 2 categorization Search Input
+        this.categorizeSearch.addEventListener('input', (e) => {
+          this.searchQuery = e.target.value;
+          this.renderCalendars();
+        });
+
+        // Tab 4 reset simulator
+        this.simulatorResetBtn.addEventListener('click', () => {
+          if (confirm('Voulez-vous réinitialiser toutes vos modifications de simulation ?')) {
+            this.agendaState.resetSimulation();
+          }
+        });
+
+        // Week navigations listeners
+        ['import', 'categorize', 'simulator'].forEach(tab => {
+          this.calWrappers[tab].prevBtn.addEventListener('click', () => {
+            this.calendarDate.setDate(this.calendarDate.getDate() - 7);
+            this.renderCalendars();
+          });
+          this.calWrappers[tab].nextBtn.addEventListener('click', () => {
+            this.calendarDate.setDate(this.calendarDate.getDate() + 7);
+            this.renderCalendars();
+          });
+        });
+
+        // Modal 1 (Add manual event) bindings
+        const closeAddModal = () => this.addEventModal.style.display = 'none';
+        this.closeAddModalBtn.addEventListener('click', closeAddModal);
+        this.cancelAddModalBtn.addEventListener('click', closeAddModal);
+        this.addEventForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.saveManualEvent();
+        });
+
+        // Modal 2 (Categorization choice) bindings
+        const closeCatModal = () => this.categorizeEventModal.style.display = 'none';
+        this.closeCatModalBtn.addEventListener('click', closeCatModal);
+        this.cancelCatModalBtn.addEventListener('click', closeCatModal);
+        
+        // Custom Category Accordion
+        this.customCatAccordionToggle.addEventListener('click', () => {
+          const isHidden = this.customCatAccordionContent.style.display === 'none';
+          this.customCatAccordionContent.style.display = isHidden ? 'flex' : 'none';
+          document.getElementById('accordion-arrow').textContent = isHidden ? '▲' : '▼';
+        });
+
+        // Form bindings for custom category
+        this.newCatName.addEventListener('input', (e) => {
+          this.createCustomCatBtn.disabled = !e.target.value.trim();
+        });
+        
+        // Create custom category button click
+        this.createCustomCatBtn.addEventListener('click', () => {
+          const label = this.newCatName.value.trim();
+          if (label && this.selectedEventForCat) {
+            const newCat = this.categoryState.addCustomCategory(label, this.selectedColor);
+            this.changeCategory(this.selectedEventForCat.id, newCat.key);
+            
+            // Clean up
+            this.newCatName.value = '';
+            this.createCustomCatBtn.disabled = true;
+            this.customCatAccordionContent.style.display = 'none';
+            document.getElementById('accordion-arrow').textContent = '▼';
+            closeCatModal();
+          }
+        });
+
+        // Modal 3 (Simulator details slider) bindings
+        const closeSimModal = () => {
+          this.simulatorAdjustmentsModal.style.display = 'none';
+          this.selectedEventForSim = null;
+        };
+        this.closeSimModalBtn.addEventListener('click', closeSimModal);
+        this.closeSimModalBtnFooter.addEventListener('click', closeSimModal);
+
+        // Adjust durations minus/plus
+        this.simDurationMinus.addEventListener('click', () => {
+          if (this.selectedEventForSim && this.selectedEventForSim.durationMinutes > 15) {
+            const next = this.selectedEventForSim.durationMinutes - 15;
+            this.agendaState.updateEventDuration(this.selectedEventForSim.id, next);
+            this.selectedEventForSim.durationMinutes = next;
+            this.syncSimModalDurationControls();
+          }
+        });
+        this.simDurationPlus.addEventListener('click', () => {
+          if (this.selectedEventForSim && this.selectedEventForSim.durationMinutes < 480) {
+            const next = this.selectedEventForSim.durationMinutes + 15;
+            this.agendaState.updateEventDuration(this.selectedEventForSim.id, next);
+            this.selectedEventForSim.durationMinutes = next;
+            this.syncSimModalDurationControls();
+          }
+        });
+        
+        // Slider value input listener
+        this.simDurationSlider.addEventListener('input', (e) => {
+          if (this.selectedEventForSim) {
+            const val = Number(e.target.value);
+            this.agendaState.updateEventDuration(this.selectedEventForSim.id, val);
+            this.selectedEventForSim.durationMinutes = val;
+            this.syncSimModalDurationControls();
+          }
+        });
+
+        // Virtual cancel presence listener
+        this.simCancelPresenceBtn.addEventListener('click', () => {
+          if (this.selectedEventForSim) {
+            this.agendaState.toggleEventDeleted(this.selectedEventForSim.id);
+            this.selectedEventForSim.isDeleted = !this.selectedEventForSim.isDeleted;
+            this.syncSimModalPresenceControls();
+          }
+        });
+      }
+
+      toggleTheme() {
+        const body = document.body;
+        const isDark = body.classList.contains('dark-theme');
+        if (isDark) {
+          body.classList.remove('dark-theme');
+          body.classList.add('light-theme');
+          localStorage.setItem('theme_preference', 'light');
+          this.themeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+        } else {
+          body.classList.remove('light-theme');
+          body.classList.add('dark-theme');
+          localStorage.setItem('theme_preference', 'dark');
+          this.themeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+        }
+        // Force refresh SVG Donut as HSL variables changed
+        this.renderStats();
+      }
+
+      switchTab(tabId) {
+        // Safety guard: block clicks if no events loaded
+        const events = this.agendaState.originalEvents;
+        if (events.length === 0 && tabId !== 'import') {
+          alert('Veuillez d\'abord charger un agenda ou utiliser les données de démonstration dans l\'onglet "Charger l\'agenda".');
+          return;
+        }
+
+        this.currentTab = tabId;
+        
+        // Toggles classes
+        this.tabButtons.forEach(btn => {
+          if (btn.getAttribute('data-tab') === tabId) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+
+        this.tabPanels.forEach(panel => {
+          if (panel.id === `panel-${tabId}`) {
+            panel.classList.add('active');
+          } else {
+            panel.classList.remove('active');
+          }
+        });
+
+        // Trigger redrawing actions
+        this.renderCalendars();
+        if (tabId === 'dashboard') {
+          this.renderStats();
+        }
+      }
+
+      updateGlobalStateViews(events) {
+        const hasEvents = events.length > 0;
+        
+        // Toggle tab navigation lock badges
+        const lockTabs = ['categorize', 'dashboard', 'simulator'];
+        lockTabs.forEach(tid => {
+          const tabButton = document.getElementById(`nav-tab-${tid}`);
+          if (hasEvents) {
+            tabButton.classList.remove('disabled');
+            const lockIcon = tabButton.querySelector('.lock-icon');
+            if (lockIcon) lockIcon.style.display = 'none';
+          } else {
+            tabButton.classList.add('disabled');
+            const lockIcon = tabButton.querySelector('.lock-icon');
+            if (lockIcon) lockIcon.style.display = 'inline';
+          }
+        });
+
+        // Header clear button show/hide
+        this.headerClearBtn.style.display = hasEvents ? 'inline-flex' : 'none';
+
+        // Redirect back to import if clear happened
+        if (!hasEvents && this.currentTab !== 'import') {
+          this.switchTab('import');
+        }
+
+        // Automatic center on first loaded event week
+        if (hasEvents && this.isFirstLoadDone !== true) {
+          const firstEventDate = new Date(events[0].startDate);
+          if (!isNaN(firstEventDate.getTime())) {
+            this.calendarDate = firstEventDate;
+            this.isFirstLoadDone = true;
+          }
+        }
+
+        // Recompute views
+        this.renderCalendars();
+        this.renderStats();
+        this.renderGoalsAndSliders();
+        this.renderCategorizeProgress(events);
+      }
+
+      renderCategorizeProgress(events) {
+        const total = events.length;
+        const categorized = events.filter(e => e.categoryKey !== 'uncategorized').length;
+        this.categorizeProgressText.textContent = `${categorized} / ${total}`;
+        
+        const pct = total > 0 ? Math.round((categorized / total) * 100) : 0;
+        this.categorizeProgressFill.style.width = `${pct}%`;
+      }
+
+      // --- PARSING FILES STAGE ---
+      handleFileInput(event) {
+        const input = event.target;
+        if (input.files && input.files.length > 0) {
+          this.handleFile(input.files[0]);
+        }
+      }
+
+      handleFile(file) {
+        if (!file.name.endsWith('.csv')) {
+          alert('Veuillez sélectionner un fichier CSV.');
+          return;
+        }
+
+        this.dropzoneLabel.innerHTML = `<span class="file-loaded"><strong>${file.name}</strong> chargé !</span>`;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target.result;
+          this.parsedEvents = this.agendaState.parseOutlookCSV(text);
+          if (this.parsedEvents.length === 0) {
+            alert('Aucun événement n\'a pu être extrait. Vérifiez le format de votre CSV.');
+            this.dropzoneLabel.innerHTML = `<strong>Glissez votre CSV Outlook</strong> ici ou <span class="browse-link">parcourez</span>`;
+            this.confirmImportBtn.disabled = true;
+          } else {
+            this.confirmImportBtn.disabled = false;
+            this.importCountBadge.textContent = this.parsedEvents.length;
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      confirmImport() {
+        if (this.parsedEvents.length > 0) {
+          this.agendaState.setEvents(this.parsedEvents);
+          this.parsedEvents = [];
+          this.confirmImportBtn.disabled = true;
+          this.importCountBadge.textContent = '0';
+          this.dropzoneLabel.innerHTML = `<strong>Glissez votre CSV Outlook</strong> ici ou <span class="browse-link">parcourez</span>`;
+          
+          // Smooth redirections
+          setTimeout(() => {
+            this.switchTab('categorize');
+          }, 300);
+        }
+      }
+
+      loadDemoData() {
+        const today = new Date();
+        const formatDate = (offsetDays) => {
+          const d = new Date(today);
+          d.setDate(today.getDate() + offsetDays);
+          return d.toISOString().split('T')[0];
+        };
+
+        const demoEvents = [
+          // Lundi
+          {
+            id: 'demo-1',
+            subject: 'Hebdo d\'alignement équipe (Sync)',
+            startDate: formatDate(0),
+            startTime: '09:00',
+            endDate: formatDate(0),
+            endTime: '10:00',
+            durationMinutes: 60,
+            categoryKey: 'meet-int',
+            originalDurationMinutes: 60,
+            originalCategoryKey: 'meet-int',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-2',
+            subject: 'Traitement des e-mails & admin',
+            startDate: formatDate(0),
+            startTime: '10:00',
+            endDate: formatDate(0),
+            endTime: '11:00',
+            durationMinutes: 60,
+            categoryKey: 'admin',
+            originalDurationMinutes: 60,
+            originalCategoryKey: 'admin',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-3',
+            subject: 'Point projet Alpha avec client',
+            startDate: formatDate(0),
+            startTime: '11:00',
+            endDate: formatDate(0),
+            endTime: '12:30',
+            durationMinutes: 90,
+            categoryKey: 'meet-ext',
+            originalDurationMinutes: 90,
+            originalCategoryKey: 'meet-ext',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-4',
+            subject: 'Pause Déjeuner & Marche',
+            startDate: formatDate(0),
+            startTime: '12:30',
+            endDate: formatDate(0),
+            endTime: '14:00',
+            durationMinutes: 90,
+            categoryKey: 'pause',
+            originalDurationMinutes: 90,
+            originalCategoryKey: 'pause',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-5',
+            subject: 'Travail individuel : Rédaction architecture',
+            startDate: formatDate(0),
+            startTime: '14:00',
+            endDate: formatDate(0),
+            endTime: '17:00',
+            durationMinutes: 180,
+            categoryKey: 'focus',
+            originalDurationMinutes: 180,
+            originalCategoryKey: 'focus',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-6',
+            subject: 'Synchro One-on-One avec Julien',
+            startDate: formatDate(0),
+            startTime: '17:00',
+            endDate: formatDate(0),
+            endTime: '18:00',
+            durationMinutes: 60,
+            categoryKey: 'meet-int',
+            originalDurationMinutes: 60,
+            originalCategoryKey: 'meet-int',
+            isDeleted: false,
+            isModified: false
+          },
+
+          // Mardi
+          {
+            id: 'demo-7',
+            subject: 'Daily Standup',
+            startDate: formatDate(1),
+            startTime: '09:15',
+            endDate: formatDate(1),
+            endTime: '09:45',
+            durationMinutes: 30,
+            categoryKey: 'meet-int',
+            originalDurationMinutes: 30,
+            originalCategoryKey: 'meet-int',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-8',
+            subject: 'Revue de Sprint & Rétrospective',
+            startDate: formatDate(1),
+            startTime: '10:00',
+            endDate: formatDate(1),
+            endTime: '12:00',
+            durationMinutes: 120,
+            categoryKey: 'meet-int',
+            originalDurationMinutes: 120,
+            originalCategoryKey: 'meet-int',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-9',
+            subject: 'Lunch avec l\'équipe',
+            startDate: formatDate(1),
+            startTime: '12:00',
+            endDate: formatDate(1),
+            endTime: '13:30',
+            durationMinutes: 90,
+            categoryKey: 'pause',
+            originalDurationMinutes: 90,
+            originalCategoryKey: 'pause',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-10',
+            subject: 'Focus : Codage & Revue de code',
+            startDate: formatDate(1),
+            startTime: '13:30',
+            endDate: formatDate(1),
+            endTime: '15:30',
+            durationMinutes: 120,
+            categoryKey: 'focus',
+            originalDurationMinutes: 120,
+            originalCategoryKey: 'focus',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-11',
+            subject: 'Réunion de cadrage design system',
+            startDate: formatDate(1),
+            startTime: '15:30',
+            endDate: formatDate(1),
+            endTime: '17:00',
+            durationMinutes: 90,
+            categoryKey: 'meet-int',
+            originalDurationMinutes: 90,
+            originalCategoryKey: 'meet-int',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-12',
+            subject: 'Factures et tâches administratives',
+            startDate: formatDate(1),
+            startTime: '17:00',
+            endDate: formatDate(1),
+            endTime: '18:00',
+            durationMinutes: 60,
+            categoryKey: 'admin',
+            originalDurationMinutes: 60,
+            originalCategoryKey: 'admin',
+            isDeleted: false,
+            isModified: false
+          },
+
+          // Mercredi
+          {
+            id: 'demo-13',
+            subject: 'Démo Produit - Client Beta',
+            startDate: formatDate(2),
+            startTime: '09:30',
+            endDate: formatDate(2),
+            endTime: '11:00',
+            durationMinutes: 90,
+            categoryKey: 'meet-ext',
+            originalDurationMinutes: 90,
+            originalCategoryKey: 'meet-ext',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-14',
+            subject: 'Saisie des temps & Comptes rendus',
+            startDate: formatDate(2),
+            startTime: '11:00',
+            endDate: formatDate(2),
+            endTime: '12:00',
+            durationMinutes: 60,
+            categoryKey: 'admin',
+            originalDurationMinutes: 60,
+            originalCategoryKey: 'admin',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-15',
+            subject: 'Déjeuner rapide',
+            startDate: formatDate(2),
+            startTime: '12:00',
+            endDate: formatDate(2),
+            endTime: '13:00',
+            durationMinutes: 60,
+            categoryKey: 'pause',
+            originalDurationMinutes: 60,
+            originalCategoryKey: 'pause',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-16',
+            subject: 'Deep Work : Conception de l\'API',
+            startDate: formatDate(2),
+            startTime: '13:00',
+            endDate: formatDate(2),
+            endTime: '16:00',
+            durationMinutes: 180,
+            categoryKey: 'focus',
+            originalDurationMinutes: 180,
+            originalCategoryKey: 'focus',
+            isDeleted: false,
+            isModified: false
+          },
+          {
+            id: 'demo-17',
+            subject: 'Alignement marketing & commercial',
+            startDate: formatDate(2),
+            startTime: '16:00',
+            endDate: formatDate(2),
+            endTime: '17:30',
+            durationMinutes: 90,
+            categoryKey: 'meet-int',
+            originalDurationMinutes: 90,
+            originalCategoryKey: 'meet-int',
+            isDeleted: false,
+            isModified: false
+          }
+        ];
+
+        const uncategorizedDemo = demoEvents.map(e => ({
+          ...e,
+          categoryKey: 'uncategorized',
+          originalCategoryKey: 'uncategorized'
+        }));
+
+        this.agendaState.setEvents(uncategorizedDemo);
+        alert('Agenda de démonstration chargé dans le calendrier !');
+        
+        // Auto redirection
+        setTimeout(() => {
+          this.switchTab('categorize');
+        }, 300);
+      }
+
+      // --- RENDERING CALENDAR STAGES ---
+      calculateWeekDays() {
+        const startOfWeek = new Date(this.calendarDate);
+        const day = startOfWeek.getDay();
+        const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+        startOfWeek.setDate(diff);
+        startOfWeek.setHours(0,0,0,0);
+
+        const days = [];
+        const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+        
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(startOfWeek);
+          d.setDate(startOfWeek.getDate() + i);
+          const dateStr = d.toISOString().split('T')[0];
+          const isToday = new Date().toISOString().split('T')[0] === dateStr;
+          const dateLabel = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+          
+          days.push({
+            name: dayNames[i],
+            dateStr,
+            dateLabel,
+            isToday
+          });
+        }
+        return days;
+      }
+
+      renderCalendars() {
+        const weekDays = this.calculateWeekDays();
+        const calendarHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+
+        // Format dates label
+        const weekLabelText = `Semaine du ${weekDays[0].dateLabel} au ${weekDays[6].dateLabel}`;
+
+        // Redraw only for visible tab or redraw all safely
+        const activeTabsList = ['import', 'categorize', 'simulator'];
+        
+        activeTabsList.forEach(tab => {
+          const targets = this.calWrappers[tab];
+          if (!targets.weekLabel) return;
+          
+          // Set week label
+          targets.weekLabel.textContent = weekLabelText;
+
+          // Render Headers
+          let headersHtml = '<div class="time-col-header"></div>';
+          weekDays.forEach(day => {
+            headersHtml += `
+              <div class="day-col-header ${day.isToday ? 'today' : ''}">
+                <span class="day-name">${day.name}</span>
+                <span class="day-date">${day.dateLabel}</span>
+              </div>
+            `;
+          });
+          targets.daysHeader.innerHTML = headersHtml;
+
+          // Render hours
+          let hoursHtml = '';
+          calendarHours.forEach(hour => {
+            hoursHtml += `<div class="hour-cell-label">${hour}:00</div>`;
+          });
+          targets.hoursCol.innerHTML = hoursHtml;
+
+          // Render grid lines
+          let linesHtml = '';
+          calendarHours.forEach(() => {
+            linesHtml += `<div class="grid-hour-line"></div>`;
+          });
+          targets.gridLines.innerHTML = linesHtml;
+
+          // Render columns with absolute positioning
+          let colsHtml = '';
+          weekDays.forEach(day => {
+            colsHtml += `<div class="day-column" data-date="${day.dateStr}">`;
+            
+            // If tab is 'import', inject click handlers
+            if (tab === 'import') {
+              colsHtml += `<div class="click-slots-container">`;
+              calendarHours.forEach(hour => {
+                colsHtml += `<div class="click-hour-slot" data-date="${day.dateStr}" data-hour="${hour}" title="Créer un événement à ${hour}:00"></div>`;
+              });
+              colsHtml += `</div>`;
+            }
+
+            // Fetch events
+            const eventsList = this.agendaState.simulatedEvents.filter(e => e.startDate === day.dateStr);
+            
+            eventsList.forEach(event => {
+              // Hide deleted events from Tab 1 and 2
+              if (event.isDeleted && tab !== 'simulator') return;
+
+              // Filter out in Tab 2 if categorization search matches
+              if (tab === 'categorize') {
+                const isFaded = this.isCategorizationFaded(event);
+                if (isFaded) return;
+              }
+
+              const pos = this.getEventPosition(event);
+              const colorHex = this.getCategoryColorHex(event.categoryKey);
+              const label = this.getCategoryLabel(event.categoryKey);
+
+              let eventClass = 'event-block clickable-block';
+              let borderStyle = `border-left: 4px solid ${colorHex};`;
+              let bgStyle = `background-color: ${colorHex}dd;`;
+
+              if (tab === 'categorize') {
+                if (event.categoryKey === 'uncategorized') {
+                  eventClass += ' uncategorized-block';
+                  borderStyle = 'border-left: 3px dashed #6b7280; border-right: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);';
+                  bgStyle = 'background-color: rgba(255,255,255,0.03);';
+                } else {
+                  borderStyle = `border-left: 4px solid ${colorHex}; border-right: 1px solid ${colorHex}44; border-top: 1px solid ${colorHex}44; border-bottom: 1px solid ${colorHex}44;`;
+                  bgStyle = `background-color: ${colorHex}22;`;
+                }
+              }
+
+              if (tab === 'simulator') {
+                if (event.isDeleted) {
+                  eventClass += ' deleted-block';
+                  borderStyle = 'border-left: 4px solid var(--color-danger) !important; border-right: 1px dashed rgba(239, 68, 68, 0.2) !important; border-top: 1px dashed rgba(239, 68, 68, 0.2) !important; border-bottom: 1px dashed rgba(239, 68, 68, 0.2) !important;';
+                  bgStyle = 'background-color: rgba(239, 68, 68, 0.04) !important;';
+                } else if (event.isModified) {
+                  eventClass += ' modified-block';
+                  borderStyle = `border-left: 4px solid ${colorHex}; border-right: 2px dashed var(--color-warning) !important; border-top: 1px solid var(--color-warning) !important; border-bottom: 1px solid var(--color-warning) !important;`;
+                  bgStyle = 'background-color: rgba(245, 158, 11, 0.05) !important;';
+                } else if (event.categoryKey === 'uncategorized') {
+                  eventClass += ' uncategorized-block';
+                  borderStyle = 'border-left: 3px dashed #6b7280; border-right: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);';
+                  bgStyle = 'background-color: rgba(255,255,255,0.03);';
+                } else {
+                  borderStyle = `border-left: 4px solid ${colorHex}; border-right: 1px solid ${colorHex}44; border-top: 1px solid ${colorHex}44; border-bottom: 1px solid ${colorHex}44;`;
+                  bgStyle = `background-color: ${colorHex}22;`;
+                }
+              }
+
+              colsHtml += `
+                <div class="${eventClass}" 
+                     data-id="${event.id}" 
+                     style="top: ${pos.top}px; height: ${pos.height}px; ${bgStyle} ${borderStyle}"
+                     title="${event.subject} (${event.durationMinutes} min)">
+                  <div class="event-block-content">
+                    <span class="event-block-time">${event.startTime} - ${event.endTime}</span>
+                    <h5 class="event-block-title">${event.subject}</h5>
+                    <span class="event-block-cat" style="color: ${event.categoryKey === 'uncategorized' && tab !== 'import' ? '#9ca3af' : (tab === 'import' ? 'rgba(255,255,255,0.8)' : colorHex)}">
+                      ${label.split(' / ')[0]} ${event.isDeleted && tab === 'simulator' ? '(Annulé)' : ''}
+                    </span>
+                  </div>
+                  ${tab === 'import' ? `<button class="delete-block-btn" data-delete-id="${event.id}" title="Supprimer cet événement">✕</button>` : ''}
+                </div>
+              `;
+            });
+
+            colsHtml += `</div>`;
+          });
+          targets.daysCols.innerHTML = colsHtml;
+
+          // Attach manual event creation handlers on cells in Tab 1
+          if (tab === 'import') {
+            targets.daysCols.querySelectorAll('.click-hour-slot').forEach(slot => {
+              slot.addEventListener('click', (e) => {
+                const dateStr = slot.getAttribute('data-date');
+                const hour = Number(slot.getAttribute('data-hour'));
+                this.openAddEventModal(dateStr, hour);
+              });
+            });
+            
+            // Delete buttons listeners
+            targets.daysCols.querySelectorAll('.delete-block-btn').forEach(btn => {
+              btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const devtId = btn.getAttribute('data-delete-id');
+                if (confirm('Voulez-vous supprimer cet événement de votre agenda ?')) {
+                  this.agendaState.deleteEventPermanently(devtId);
+                }
+              });
+            });
+          }
+
+          // Category clicks triggers in Tab 2
+          if (tab === 'categorize') {
+            targets.daysCols.querySelectorAll('.event-block').forEach(block => {
+              block.addEventListener('click', () => {
+                const devtId = block.getAttribute('data-id');
+                const ev = this.agendaState.simulatedEvents.find(e => e.id === devtId);
+                if (ev) this.openCategorizeEventModal(ev);
+              });
+            });
+          }
+
+          // Simulation sliders triggers in Tab 4
+          if (tab === 'simulator') {
+            targets.daysCols.querySelectorAll('.event-block').forEach(block => {
+              block.addEventListener('click', () => {
+                const devtId = block.getAttribute('data-id');
+                const ev = this.agendaState.simulatedEvents.find(e => e.id === devtId);
+                if (ev) this.openSimulatorEventModal(ev);
+              });
+            });
+          }
+        });
+        
+        // Simulator empty state toggle
+        if (this.agendaState.originalEvents.length === 0) {
+          this.simulatorEmptyState.style.display = 'block';
+        } else {
+          this.simulatorEmptyState.style.display = 'none';
+        }
+      }
+
+      isCategorizationFaded(event) {
+        if (this.searchQuery && !event.subject.toLowerCase().includes(this.searchQuery.toLowerCase())) {
+          return true;
+        }
+        if (this.filterCategory === 'uncategorized') {
+          return event.categoryKey !== 'uncategorized';
+        } else if (this.filterCategory !== 'all') {
+          return event.categoryKey !== this.filterCategory;
+        }
+        return false;
+      }
+
+      getEventPosition(event) {
+        const [h, m] = event.startTime.split(':').map(Number);
+        const startMins = h * 60 + m;
+        const gridStartMins = 8 * 60; // 08:00
+        
+        const diffMins = Math.max(0, startMins - gridStartMins);
+        const pxPerMin = 50 / 60;
+        
+        const top = diffMins * pxPerMin;
+        const height = event.durationMinutes * pxPerMin;
+
+        return { top, height };
+      }
+
+      getCategoryColorHex(key) {
+        const found = this.categoryState.getCategories().find(c => c.key === key);
+        return found ? found.colorHex : '#6b7280';
+      }
+
+      getCategoryLabel(key) {
+        const found = this.categoryState.getCategories().find(c => c.key === key);
+        return found ? found.label : 'Non classé';
+      }
+
+      // --- RENDERING CATEGORIES LISTS AND MANAGER ---
+      renderCategoryLists() {
+        const categories = this.categoryState.getCategories();
+        const custom = categories.filter(c => !c.isDefault);
+
+        // Tab 2 Categories Filters
+        let filtersHtml = `
+          <button class="btn btn-secondary btn-sm ${this.filterCategory === 'all' ? 'active' : ''}" id="filter-all-btn">
+            Tout voir
+          </button>
+          <button class="btn btn-secondary btn-sm ${this.filterCategory === 'uncategorized' ? 'active' : ''}" id="filter-uncat-btn">
+            Non classés (${this.agendaState.simulatedEvents.filter(e => e.categoryKey === 'uncategorized').length})
+          </button>
+        `;
+
+        categories.filter(c => c.key !== 'uncategorized').forEach(cat => {
+          filtersHtml += `
+            <button class="btn btn-secondary btn-sm ${this.filterCategory === cat.key ? 'active' : ''}" data-filter-key="${cat.key}">
+              <span class="color-dot" style="background-color: ${cat.colorHex}"></span>
+              ${cat.label.split(' / ')[0]}
+            </button>
+          `;
+        });
+        this.categorizeFiltersRow.innerHTML = filtersHtml;
+
+        // Rebind click listeners on filters
+        this.categorizeFiltersRow.querySelector('#filter-all-btn').addEventListener('click', () => {
+          this.filterCategory = 'all';
+          this.renderCategoryLists();
+          this.renderCalendars();
+        });
+        this.categorizeFiltersRow.querySelector('#filter-uncat-btn').addEventListener('click', () => {
+          this.filterCategory = 'uncategorized';
+          this.renderCategoryLists();
+          this.renderCalendars();
+        });
+        this.categorizeFiltersRow.querySelectorAll('[data-filter-key]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.filterCategory = btn.getAttribute('data-filter-key');
+            this.renderCategoryLists();
+            this.renderCalendars();
+          });
+        });
+
+        // Tab 2 Custom categories list manager
+        let customListHtml = '';
+        if (custom.length > 0) {
+          custom.forEach(cat => {
+            customListHtml += `
+              <div class="custom-cat-pill" style="border-color: ${cat.colorHex}">
+                <span class="color-dot" style="background-color: ${cat.colorHex}"></span>
+                <span class="cat-pill-label">${cat.label}</span>
+                <button class="remove-cat-btn" data-delete-key="${cat.key}" title="Supprimer la catégorie">✕</button>
+              </div>
+            `;
+          });
+        } else {
+          customListHtml = `<div class="no-custom-cats">Aucune catégorie personnalisée. Créez-en une directement depuis la modale de classement d'un événement !</div>`;
+        }
+        this.customCatsListContainer.innerHTML = customListHtml;
+
+        // Rebind delete key listeners
+        this.customCatsListContainer.querySelectorAll('[data-delete-key]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const key = btn.getAttribute('data-delete-key');
+            if (confirm('Voulez-vous supprimer cette catégorie personnalisée ? Tous les événements associés redeviendront non classés.')) {
+              this.categoryState.removeCustomCategory(key);
+              
+              // Cascade clean up
+              const updatedOrig = this.agendaState.originalEvents.map(ev => {
+                if (ev.categoryKey === key) {
+                  return { ...ev, categoryKey: 'uncategorized', originalCategoryKey: 'uncategorized' };
+                }
+                return ev;
+              });
+              this.agendaState.setEvents(updatedOrig);
+            }
+          });
+        });
+      }
+
+      // --- RENDERING TAB 3: STATS AND KPI ---
+      renderStats() {
+        const stats = this.agendaState.calculateStats(this.agendaState.simulatedEvents);
+        
+        // 1. KPI cards rendering
+        this.dashboardScoreVal.textContent = `${stats.efficiencyScore} / 100`;
+        this.dashboardScoreVal.className = `kpi-value ${this.getScoreColorClass(stats.efficiencyScore)}`;
+        this.dashboardScoreFeedback.textContent = this.getScoreFeedback(stats.efficiencyScore);
+        
+        this.dashboardFocusVal.textContent = `${stats.focusHours} heures`;
+        this.dashboardFocusSub.textContent = `${stats.focusBlocksCount} grand${stats.focusBlocksCount > 1 ? 's' : ''} bloc${stats.focusBlocksCount > 1 ? 's' : ''} de focus (>= 90m)`;
+
+        // Fetch meetings stats percentage
+        let meetingPct = 0;
+        Object.keys(stats.percentagesByCategory).forEach(key => {
+          if (key !== 'focus' && key !== 'pause' && key !== 'uncategorized') {
+            meetingPct += stats.percentagesByCategory[key] || 0;
+          }
+        });
+        this.dashboardMeetingsVal.textContent = `${stats.meetingHours} heures`;
+        this.dashboardMeetingsSub.textContent = `${meetingPct}% de votre temps total d'agenda`;
+
+        // 2. Interactive SVG Donut chart injection
+        const categories = this.categoryState.getCategories();
+        const activeCategories = categories.filter(c => {
+          const hours = stats.hoursByCategory[c.key] || 0;
+          return hours > 0;
+        });
+
+        const circumference = 2 * Math.PI * 70; // 439.82
+        let currentOffset = 0;
+        
+        let segmentsHtml = '';
+        let legendHtml = '';
+        
+        activeCategories.forEach((cat, index) => {
+          const percentage = stats.percentagesByCategory[cat.key] || 0;
+          const hours = stats.hoursByCategory[cat.key] || 0;
+          
+          const strokeLength = (percentage / 100) * circumference;
+          const strokeDashArray = `${strokeLength} ${circumference - strokeLength}`;
+          const strokeDashOffset = -currentOffset;
+          currentOffset += strokeLength;
+
+          // Generate segments SVG path
+          segmentsHtml += `
+            <circle class="donut-segment" 
+                    cx="100" cy="100" r="70" 
+                    fill="none" 
+                    stroke="${cat.colorHex}" 
+                    stroke-width="16" 
+                    stroke-dasharray="${strokeDashArray}" 
+                    stroke-dashoffset="${strokeDashOffset}" 
+                    stroke-linecap="round" 
+                    transform="rotate(-90 100 100)" 
+                    data-segment-key="${cat.key}">
+            </circle>
+          `;
+
+          // Generate legend card row
+          legendHtml += `
+            <div class="legend-item" data-legend-key="${cat.key}">
+              <div class="legend-color-box" style="background-color: ${cat.colorHex}"></div>
+              <div class="legend-details">
+                <span class="legend-label">${cat.label}</span>
+                <span class="legend-values">
+                  <strong>${hours}h</strong> (${percentage}%)
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        const donutSvgTemplate = `
+          <div class="donut-chart-container">
+            <div class="chart-wrapper">
+              <svg viewBox="0 0 200 200" class="donut-svg">
+                <!-- Background track -->
+                <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="16"></circle>
+                <!-- Dynamic active slices -->
+                ${segmentsHtml}
+                <!-- Center details -->
+                <g class="center-text">
+                  <text x="100" y="92" class="score-value">${stats.efficiencyScore}</text>
+                  <text x="100" y="112" class="score-label">SCORE</text>
+                  <text x="100" y="128" class="score-sub">d'efficacité</text>
+                </g>
+              </svg>
+            </div>
+            
+            <div class="legend-container">
+              ${legendHtml}
+            </div>
+          </div>
+        `;
+        this.donutChartTargetContainer.innerHTML = donutSvgTemplate;
+
+        // Bind interactive SVG events (segments <-> legends sync)
+        const segments = this.donutChartTargetContainer.querySelectorAll('.donut-segment');
+        const legends = this.donutChartTargetContainer.querySelectorAll('.legend-item');
+
+        segments.forEach(seg => {
+          const key = seg.getAttribute('data-segment-key');
+          const matchingLegend = this.donutChartTargetContainer.querySelector(`[data-legend-key="${key}"]`);
+          
+          seg.addEventListener('mouseenter', () => {
+            seg.classList.add('active');
+            if (matchingLegend) matchingLegend.classList.add('hovered');
+          });
+          seg.addEventListener('mouseleave', () => {
+            seg.classList.remove('active');
+            if (matchingLegend) matchingLegend.classList.remove('hovered');
+          });
+        });
+
+        legends.forEach(leg => {
+          const key = leg.getAttribute('data-legend-key');
+          const matchingSeg = this.donutChartTargetContainer.querySelector(`[data-segment-key="${key}"]`);
+          
+          leg.addEventListener('mouseenter', () => {
+            leg.classList.add('hovered');
+            if (matchingSeg) matchingSeg.classList.add('active');
+          });
+          leg.addEventListener('mouseleave', () => {
+            leg.classList.remove('hovered');
+            if (matchingSeg) matchingSeg.classList.remove('active');
+          });
+        });
+      }
+
+      getScoreColorClass(score) {
+        if (score >= 80) return 'text-focus';
+        if (score >= 50) return 'text-warning';
+        return 'text-danger';
+      }
+
+      getScoreFeedback(score) {
+        if (score >= 80) return 'Excellent équilibre de temps !';
+        if (score >= 60) return 'Bonne organisation générale.';
+        if (score >= 40) return 'Attention à l\'encombrement.';
+        return 'Agenda critique, surcharge !';
+      }
+
+      // --- RENDERING TAB 4: SIMULATOR GOALS & ACTION PLAN ---
+      renderGoalsAndSliders() {
+        const categories = this.categoryState.getCategories().filter(c => c.key !== 'uncategorized');
+        const stats = this.agendaState.calculateStats(this.agendaState.simulatedEvents);
+        
+        let goalsHtml = '';
+        
+        categories.forEach(cat => {
+          const actualPct = stats.percentagesByCategory[cat.key] || 0;
+          const targetPct = this.agendaState.goal.percentages[cat.key] || 0;
+          const cmpState = this.getGoalComparisonState(cat.key, actualPct, targetPct);
+          const cmpLabel = this.getGoalComparisonLabel(cat.key, actualPct, targetPct);
+
+          goalsHtml += `
+            <div class="goal-input-group" data-goal-key="${cat.key}">
+              <div class="goal-input-row">
+                <div class="goal-label-group">
+                  <span class="color-dot" style="background-color: ${cat.colorHex}"></span>
+                  <span class="goal-cat-name">${cat.label.split(' / ')[0]}</span>
+                </div>
+                
+                <div class="goal-value-control">
+                  <button type="button" class="btn-adjust-qty" data-adjust-delta="-5" data-adjust-key="${cat.key}">-</button>
+                  <span class="goal-qty-display">${targetPct}%</span>
+                  <button type="button" class="btn-adjust-qty" data-adjust-delta="5" data-adjust-key="${cat.key}">+</button>
+                </div>
+              </div>
+
+              <!-- Comparison details -->
+              <div class="comparison-bar-wrapper">
+                <div class="bar-labels">
+                  <span class="lbl-actual">Actuel : <strong>${actualPct}%</strong></span>
+                  <span class="lbl-target">Cible : ${targetPct}%</span>
+                </div>
+                
+                <div class="dual-progress-bar">
+                  <div class="progress-fill actual-fill" style="width: ${actualPct}%; background-color: ${cat.colorHex};"></div>
+                  <div class="target-marker" style="left: ${targetPct}%;" title="Objectif : ${targetPct}%"></div>
+                </div>
+                
+                <div class="comparison-badge ${cmpState}">
+                  ${cmpLabel}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        // Compute goals percentages sum
+        const goalSum = Object.values(this.agendaState.goal.percentages).reduce((a, b) => a + b, 0);
+        const isValid = goalSum === 100;
+
+        goalsHtml += `
+          <div class="goal-sum-row ${isValid ? 'success' : 'error'}">
+            <span>Somme des objectifs :</span>
+            <strong>${goalSum}%</strong>
+          </div>
+          <button class="btn btn-primary w-full" id="simulator-save-goal-btn" ${isValid ? '' : 'disabled'}>
+            Enregistrer l'objectif
+          </button>
+        `;
+
+        this.simulatorGoalsFormContainer.innerHTML = goalsHtml;
+
+        // Rebind adjustments delta click listener
+        this.simulatorGoalsFormContainer.querySelectorAll('[data-adjust-delta]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-adjust-key');
+            const delta = Number(btn.getAttribute('data-adjust-delta'));
+            
+            const current = this.agendaState.goal.percentages[key] || 0;
+            const next = current + delta;
+            
+            if (next >= 0 && next <= 100) {
+              const updatedGoal = {
+                percentages: {
+                  ...this.agendaState.goal.percentages,
+                  [key]: next
+                }
+              };
+              this.agendaState.setGoal(updatedGoal);
+            }
+          });
+        });
+
+        // Save target goal btn
+        this.simulatorGoalsFormContainer.querySelector('#simulator-save-goal-btn').addEventListener('click', () => {
+          alert('Objectif de répartition enregistré avec succès !');
+        });
+
+        // Draw optimization action plan
+        this.renderOptimizationPlan();
+      }
+
+      getGoalComparisonState(key, actual, target) {
+        if (key === 'focus') {
+          if (actual >= target) return 'status-success';
+          if (actual >= target - 10) return 'status-warning';
+          return 'status-danger';
+        }
+        if (key === 'pause') {
+          if (Math.abs(actual - target) <= 2) return 'status-success';
+          if (actual < target) return 'status-info';
+          return 'status-warning';
+        }
+        // Meetings
+        if (actual <= target) return 'status-success';
+        if (actual <= target + 10) return 'status-warning';
+        return 'status-danger';
+      }
+
+      getGoalComparisonLabel(key, actual, target) {
+        if (key === 'focus') {
+          if (actual >= target) return '🎯 Objectif Atteint';
+          return `⚠️ Manque ${target - actual}%`;
+        }
+        if (key === 'pause') {
+          if (Math.abs(actual - target) <= 2) return '⚖️ Équilibre Atteint';
+          if (actual < target) return `💤 À augmenter de ${target - actual}%`;
+          return `☕ Excès de ${actual - target}%`;
+        }
+        if (actual <= target) return '✅ Réduit / Sous contrôle';
+        return `🚨 Excès de ${actual - target}%`;
+      }
+
+      renderOptimizationPlan() {
+        const actions = this.agendaState.getOptimizationActions();
+        
+        let planHtml = '';
+        if (actions.length === 0) {
+          planHtml = `
+            <div class="empty-actions">
+              <p>Cliquez sur les réunions dans l'agenda hebdomadaire pour les raccourcir ou les supprimer afin de voir s'afficher votre plan d'action ici.</p>
+            </div>
+          `;
+        } else {
+          // Optimization Plan Checklist
+          let listHtml = '';
+          actions.forEach(a => {
+            let icon = '🔄';
+            if (a.type === 'suppression') icon = '❌';
+            if (a.type === 'raccourcissement') icon = '⏱️';
+            listHtml += `
+              <div class="action-item">
+                <span class="action-icon">${icon}</span>
+                <span class="action-desc">${a.description}</span>
+              </div>
+            `;
+          });
+
+          planHtml = `
+            <p class="card-desc">Voici les modifications à appliquer dans Outlook pour atteindre vos objectifs :</p>
+            <div class="actions-list">
+              ${listHtml}
+            </div>
+
+            <!-- Gains summary boxes -->
+            <div class="action-gains">
+              <strong>🎉 Gains estimés :</strong>
+              <span>${this.getSimulatorGainsText()}</span>
+            </div>
+
+            <div class="action-buttons-row">
+              <button class="btn btn-secondary w-full" id="sim-copy-plan-btn">
+                📋 Copier le plan d'action
+              </button>
+            </div>
+          `;
+        }
+
+        this.simulatorActionsPlanContainer.innerHTML = planHtml;
+
+        // Rebind copy to clipboard listener
+        const copyBtn = this.simulatorActionsPlanContainer.querySelector('#sim-copy-plan-btn');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            this.copyActionPlanToClipboard(actions);
+          });
+        }
+      }
+
+      getSimulatorGainsText() {
+        const origEvents = this.agendaState.originalEvents;
+        const simEvents = this.agendaState.simulatedEvents;
+        
+        let origMins = 0;
+        let simMins = 0;
+        let origFocus = 0;
+        let simFocus = 0;
+
+        origEvents.forEach(e => {
+          origMins += e.durationMinutes;
+          if (e.categoryKey === 'focus') origFocus += e.durationMinutes;
+        });
+
+        simEvents.forEach(e => {
+          if (e.isDeleted) return;
+          simMins += e.durationMinutes;
+          if (e.categoryKey === 'focus') simFocus += e.durationMinutes;
+        });
+
+        const focusGainMins = simFocus - origFocus;
+        const timeSavedMins = origMins - simMins;
+
+        const formatMins = (m) => {
+          if (m < 60) return `${m} min`;
+          const hrs = Math.floor(m / 60);
+          const mins = m % 60;
+          return mins > 0 ? `${hrs}h ${mins}m` : `${hrs} heures`;
+        };
+
+        let text = '';
+        if (timeSavedMins > 0) {
+          text += `⏱️ ${formatMins(timeSavedMins)} de réunion libéré`;
+        }
+        if (focusGainMins > 0) {
+          text += text ? ` et 🎯 ${formatMins(focusGainMins)} de concentration supplémentaire !` : `🎯 ${formatMins(focusGainMins)} de concentration supplémentaire !`;
+        }
+
+        return text || "Aucun changement pour le moment.";
+      }
+
+      copyActionPlanToClipboard(actions) {
+        if (actions.length === 0) return;
+        
+        let copyText = "PLAN D'OPTIMISATION DE MON AGENDA OUTLOOK\n";
+        copyText += "========================================\n\n";
+        
+        actions.forEach((a, idx) => {
+          copyText += `${idx + 1}. [ ] ${a.description}\n`;
+        });
+        
+        copyText += `\n🎯 Objectif estimé : ${this.getSimulatorGainsText()}\n`;
+        copyText += "\nPlanifié sur l'application Agenda Efficacité.";
+
+        navigator.clipboard.writeText(copyText).then(() => {
+          alert('Plan d\'action copié dans votre presse-papiers ! Vous pouvez le coller dans vos notes ou OneNote.');
+        }).catch(err => {
+          console.error('Erreur de copie dans le presse-papiers', err);
+        });
+      }
+
+      // --- MODALS TRIGGER FLOW ---
+      openAddEventModal(dateStr, hour) {
+        this.modalStartDate.value = dateStr;
+        this.modalStartTime.value = `${String(hour).padStart(2, '0')}:00`;
+        this.modalSubject.value = '';
+        this.modalDuration.value = 60;
+
+        this.addEventModal.style.display = 'flex';
+        this.modalSubject.focus();
+      }
+
+      saveManualEvent() {
+        const subject = this.modalSubject.value.trim();
+        const startDate = this.modalStartDate.value;
+        const startTime = this.modalStartTime.value;
+        const durationMinutes = Number(this.modalDuration.value);
+
+        if (!subject || !startDate || !startTime || isNaN(durationMinutes)) return;
+
+        // Auto calculate end times
+        const [h, m] = startTime.split(':').map(Number);
+        const totalMins = h * 60 + m + durationMinutes;
+        const endH = Math.floor(totalMins / 60) % 24;
+        const endM = totalMins % 60;
+        const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+        // Predict categories
+        const categoryKey = this.categoryState.suggestCategory(subject);
+
+        this.agendaState.addManualEvent({
+          subject,
+          categoryKey,
+          startDate,
+          startTime,
+          endDate: startDate,
+          endTime,
+          durationMinutes
+        });
+
+        this.addEventModal.style.display = 'none';
+        
+        // Auto navigate forward
+        setTimeout(() => {
+          this.switchTab('categorize');
+        }, 300);
+      }
+
+      openCategorizeEventModal(event) {
+        this.selectedEventForCat = event;
+        
+        this.catPreviewSubject.textContent = event.subject;
+        this.catPreviewDate.textContent = `📅 ${this.formatDateFrench(event.startDate)}`;
+        this.catPreviewTime.textContent = `⏰ ${event.startTime} - ${event.endTime} (${event.durationMinutes} min)`;
+        
+        // Clean accordion inputs
+        this.newCatName.value = '';
+        this.createCustomCatBtn.disabled = true;
+        this.customCatAccordionContent.style.display = 'none';
+        document.getElementById('accordion-arrow').textContent = '▼';
+
+        // Render color picker dots
+        let colorsHtml = '';
+        this.colorPalette.forEach(col => {
+          colorsHtml += `
+            <button type="button" class="color-picker-dot ${this.selectedColor === col ? 'selected' : ''}" 
+                    style="background-color: ${col}" data-color-dot-val="${col}">
+            </button>
+          `;
+        });
+        this.newCatColorPicker.innerHTML = colorsHtml;
+
+        // Color dot listeners
+        this.newCatColorPicker.querySelectorAll('[data-color-dot-val]').forEach(dot => {
+          dot.addEventListener('click', () => {
+            this.selectedColor = dot.getAttribute('data-color-dot-val');
+            this.newCatColorPicker.querySelectorAll('.color-picker-dot').forEach(d => d.classList.remove('selected'));
+            dot.classList.add('selected');
+          });
+        });
+
+        // Render categorization selection items grid
+        const categories = this.categoryState.getCategories();
+        let gridHtml = '';
+        
+        categories.forEach(cat => {
+          const isActive = event.categoryKey === cat.key;
+          gridHtml += `
+            <button type="button" class="category-select-btn-item ${isActive ? 'active' : ''}" 
+                    style="border-color: ${cat.colorHex}aa; background-color: ${isActive ? cat.colorHex + '25' : 'rgba(255,255,255,0.02)'}"
+                    data-cat-assign-key="${cat.key}">
+              <span class="color-dot" style="background-color: ${cat.colorHex}"></span>
+              <span class="cat-btn-label">${cat.label.split(' / ')[0]}</span>
+              ${isActive ? '<span class="active-indicator">✓</span>' : ''}
+            </button>
+          `;
+        });
+        this.catSelectionGrid.innerHTML = gridHtml;
+
+        // Assign button binding
+        this.catSelectionGrid.querySelectorAll('[data-cat-assign-key]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-cat-assign-key');
+            this.changeCategory(event.id, key);
+            this.categorizeEventModal.style.display = 'none';
+            this.selectedEventForCat = null;
+          });
+        });
+
+        this.categorizeEventModal.style.display = 'flex';
+      }
+
+      changeCategory(eventId, categoryKey) {
+        this.agendaState.updateEventCategory(eventId, categoryKey);
+        
+        // Cascades apply change back to core Original as well (Tab 2 spec)
+        const updatedOrig = this.agendaState.originalEvents.map(e => {
+          if (e.id === eventId) {
+            return {
+              ...e,
+              categoryKey,
+              originalCategoryKey: categoryKey
+            };
+          }
+          return e;
+        });
+        this.agendaState.setEvents(updatedOrig);
+      }
+
+      openSimulatorEventModal(event) {
+        this.selectedEventForSim = event;
+
+        this.simPreviewSubject.textContent = event.subject;
+        this.simPreviewDate.textContent = `📅 ${this.formatDateFrench(event.startDate)}`;
+        this.simPreviewTime.textContent = `⏰ ${event.startTime} - ${event.endTime} (${event.durationMinutes} min)`;
+        
+        this.syncSimModalPresenceControls();
+        this.syncSimModalDurationControls();
+
+        // Render categorization selection items grid
+        const categories = this.categoryState.getCategories().filter(c => c.key !== 'uncategorized');
+        let gridHtml = '';
+        
+        categories.forEach(cat => {
+          const isActive = event.categoryKey === cat.key;
+          gridHtml += `
+            <button type="button" class="category-select-btn-item ${isActive ? 'active' : ''}" 
+                    style="border-color: ${cat.colorHex}aa; background-color: ${isActive ? cat.colorHex + '25' : 'rgba(255,255,255,0.02)'}"
+                    data-sim-assign-key="${cat.key}" 
+                    ${event.isDeleted ? 'disabled' : ''}>
+              <span class="color-dot" style="background-color: ${cat.colorHex}"></span>
+              <span class="cat-btn-label">${cat.label.split(' / ')[0]}</span>
+              ${isActive ? '<span class="active-indicator">✓</span>' : ''}
+            </button>
+          `;
+        });
+        this.simCatSelectionGrid.innerHTML = gridHtml;
+
+        // Assign button binding
+        this.simCatSelectionGrid.querySelectorAll('[data-sim-assign-key]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-sim-assign-key');
+            this.agendaState.updateEventCategory(event.id, key);
+            this.selectedEventForSim.categoryKey = key;
+            this.openSimulatorEventModal(this.selectedEventForSim); // re-draw
+          });
+        });
+
+        this.simulatorAdjustmentsModal.style.display = 'flex';
+      }
+
+      syncSimModalPresenceControls() {
+        const ev = this.selectedEventForSim;
+        if (!ev) return;
+
+        const catColorHex = this.getCategoryColorHex(ev.categoryKey);
+        this.simModalPreviewCard.style.borderLeft = `4px solid ${ev.isDeleted ? 'var(--color-danger)' : catColorHex}`;
+        this.simPreviewSubject.style.textDecoration = ev.isDeleted ? 'line-through' : 'none';
+
+        if (ev.isDeleted) {
+          this.simPreviewBadgeDeleted.style.display = 'inline-flex';
+          this.simPreviewBadgeModified.style.display = 'none';
+          this.simCancelPresenceBtn.className = 'btn w-full btn-success';
+          this.simCancelPresenceBtn.textContent = "🔄 Restaurer l'événement dans l'agenda";
+          
+          this.simDurationMinus.disabled = true;
+          this.simDurationPlus.disabled = true;
+          this.simDurationSlider.disabled = true;
+        } else {
+          this.simPreviewBadgeDeleted.style.display = 'none';
+          this.simPreviewBadgeModified.style.display = ev.isModified ? 'inline-flex' : 'none';
+          this.simCancelPresenceBtn.className = 'btn w-full btn-danger';
+          this.simCancelPresenceBtn.textContent = "❌ Annuler / Supprimer de l'agenda";
+          
+          this.simDurationMinus.disabled = ev.durationMinutes <= 15;
+          this.simDurationPlus.disabled = ev.durationMinutes >= 480;
+          this.simDurationSlider.disabled = false;
+        }
+      }
+
+      syncSimModalDurationControls() {
+        const ev = this.selectedEventForSim;
+        if (!ev) return;
+
+        this.simDurationText.textContent = ev.durationMinutes;
+        this.simDurationSlider.value = ev.durationMinutes;
+
+        // Recompute end times label dynamically
+        const [h, m] = ev.startTime.split(':').map(Number);
+        const totalMins = h * 60 + m + ev.durationMinutes;
+        const endH = Math.floor(totalMins / 60) % 24;
+        const endM = totalMins % 60;
+        const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+        this.simPreviewTime.textContent = `⏰ ${ev.startTime} - ${endTime} (${ev.durationMinutes} min)`;
+
+        if (ev.isModified && !ev.isDeleted) {
+          this.simOriginalDurationText.style.display = 'block';
+          this.simOriginalDurationText.textContent = `Durée initiale : ${ev.originalDurationMinutes} min`;
+          this.simPreviewBadgeModified.style.display = 'inline-flex';
+        } else {
+          this.simOriginalDurationText.style.display = 'none';
+          if (!ev.isDeleted) this.simPreviewBadgeModified.style.display = 'none';
+        }
+      }
+
+      formatDateFrench(dateStr) {
+        if (!dateStr) return '';
+        try {
+          const parts = dateStr.split('-');
+          if (parts.length === 3) {
+            const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+          }
+          return dateStr;
+        } catch (e) {
+          return dateStr;
+        }
+      }
+    }
+
+    // --- LAUNCH APPLICATION RUNTIME ---
+    window.addEventListener('DOMContentLoaded', () => {
+      window.app = new AppController();
+    });
+  </script>
